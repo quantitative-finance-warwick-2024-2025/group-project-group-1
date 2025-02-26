@@ -52,10 +52,6 @@ void CLIHandler::run()
         {
             displayHelp();
         } 
-        else if(command == "EXIT")
-        {
-            break;
-        }
         else if (tokens.size() == 4 && command == "LIMIT")
         {
             std::cout << "LIMIT ORDER" << std::endl;
@@ -79,6 +75,26 @@ void CLIHandler::run()
         else if (tokens.size() == 2 && command == "CANCEL")
         {
             std::cout << "CANCEL ORDER" << std::endl;
+        }
+        else if (tokens.size() == 1 && command == "BOOK")
+        {
+            std::cout << "BOOK" << std::endl;
+        }
+        else if (tokens.size() >= 1 && tokens.size() <= 2 && command == "DEPTH")
+        {
+            std::cout << "DEPTH" << std::endl;
+        }
+        else if (tokens.size() == 1 && command == "BEST")
+        {
+            std::cout << "BEST" << std::endl;
+        }
+        else if (tokens.size() == 1 && command == "HISTORY")
+        {
+            std::cout << "HISTORY" << std::endl;
+        }
+        else if(command == "EXIT")
+        {
+            break;
         }
         else 
         {
