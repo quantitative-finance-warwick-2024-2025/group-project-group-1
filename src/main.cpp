@@ -1,8 +1,8 @@
-
 #include <iostream>
+#include "CLIHandler.hpp"
 
 int main()
 {
-	std::cout << "Hello" << std::endl;
+    CLIHandler cliHandler;
+    cliHandler.run();
 }
-
