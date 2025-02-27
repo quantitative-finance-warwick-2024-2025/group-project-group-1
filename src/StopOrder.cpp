@@ -1,11 +1,12 @@
 #include "StopOrder.hpp"
+#include "OrderBook.hpp"
 #include <string>
 #include <iostream>
 
 // Create the constructor of the Stop Order
-StopOrder::StopOrder(int qty, bool isBuy, double stopPrice)
+StopOrder::StopOrder(OrderBook& orderBook, int qty, bool isBuy, double stopPrice)
   :
-  Order(qty, isBuy),
+  Order(orderBook, qty, isBuy),
   m_stopPrice(stopPrice),
   m_triggered(false)
 {}

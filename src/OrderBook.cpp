@@ -1,16 +1,21 @@
 #include "OrderBook.hpp"
+#include "Order.hpp"
 
 // Create constructor
-OrderBook::OrderBook() {}
+OrderBook::OrderBook()
+  :
+  marketName("LOB")
+{}
 
 // Method that generates an orderId
 int OrderBook::generateOrderId() 
 {
-  return 0;
+  currentOrderId++;
+  return currentOrderId;
 }
 
 // Method that add orders to the book
-void addOrder(Order* order)
+void addOrder()
 {}
 
 // Method that handles matching of orders
@@ -18,7 +23,7 @@ void matchOrders()
 {}
 
 // Method that removes an order from the order book
-void removeOrder(Order* order)
+void removeOrder()
 {}
 
 // Method that gets the best bid from the order book
@@ -34,7 +39,7 @@ double getMarketSpread()
 {}
 
 // Method that cancels an order
-void cancelOrder(int orderId)
+void cancelOrder()
 {}
 
 // Get the current snapshot of the book

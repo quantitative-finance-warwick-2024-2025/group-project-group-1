@@ -1,11 +1,12 @@
 #include <iostream>
 #include <string>
 #include "IcebergOrder.hpp"
+#include "OrderBook.hpp"
 
 // Create constructor for Iceberg Order
-IcebergOrder::IcebergOrder(int qty, bool isBuy, int displayQty, double limitPrice)
+IcebergOrder::IcebergOrder(OrderBook& orderBook, int qty, bool isBuy, int displayQty, double limitPrice)
   :
-  Order(qty, isBuy),
+  Order(orderBook, qty, isBuy),
   m_displayQty(displayQty),
   m_limitPrice(limitPrice)
 {}

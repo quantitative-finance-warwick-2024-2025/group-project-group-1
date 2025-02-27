@@ -1,29 +1,33 @@
 #pragma once
+#include "OrderBook.hpp"
 #include <string>
 #include <vector>
 
 class CLIHandler {
-    public:
-        // Constructor
-        CLIHandler();
+  private:
+    OrderBook& m_orderBook;
 
-        bool isValidSide(std::string &side);
-        bool isValidDouble(std::string &value);
-        bool isValidInt(std::string &value);
+  public:
+    // Constructor
+    CLIHandler(OrderBook& orderBook);
 
-        // Print Help
-        void displayHelp();
+    bool isValidSide(std::string &side);
+    bool isValidDouble(std::string &value);
+    bool isValidInt(std::string &value);
 
-        // Parse Command Line Arguments
-        std::vector<std::string> parseArguments(std::string &command);
+    // Print Help
+    void displayHelp();
 
-        // Handle orders
-        void handleLimitOrder(std::vector<std::string> &tokens);
-        void handleMarketOrder(std::vector<std::string> &tokens);
-        void handleStopOrder(std::vector<std::string> &tokens);
-        void handleStopLimitOrder(std::vector<std::string> &tokens);
-        void handleIcebergOrder(std::vector<std::string> &tokens);
+    // Parse Command Line Arguments
+    std::vector<std::string> parseArguments(std::string &command);
 
-        // Run CLIHandler
-        void run();
+    // Handle orders
+    void handleLimitOrder(std::vector<std::string> &tokens);
+    void handleMarketOrder(std::vector<std::string> &tokens);
+    void handleStopOrder(std::vector<std::string> &tokens);
+    void handleStopLimitOrder(std::vector<std::string> &tokens);
+    void handleIcebergOrder(std::vector<std::string> &tokens);
+
+    // Run CLIHandler
+    void run();
 };

@@ -1,11 +1,12 @@
 #include "LimitOrder.hpp"
+#include "OrderBook.hpp"
 #include <string>
 #include <iostream>
 
 // Constructor of Limit Order
-LimitOrder::LimitOrder(int qty, bool isBuy, double limitPrice)
+LimitOrder::LimitOrder(OrderBook& orderBook, int qty, bool isBuy, double limitPrice)
   :
-  Order(qty, isBuy),
+  Order(orderBook, qty, isBuy),
   m_limitPrice(limitPrice)
 {}
 

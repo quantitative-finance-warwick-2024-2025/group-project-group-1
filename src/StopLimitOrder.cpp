@@ -1,11 +1,12 @@
 #include <iostream>
 #include <string>
+#include "OrderBook.hpp"
 #include "StopLimitOrder.hpp"
 
 // Create the constructor for the stop limit order
-StopLimitOrder::StopLimitOrder(int qty, bool isBuy, double stopPrice, double limitPrice)
+StopLimitOrder::StopLimitOrder(OrderBook& orderBook, int qty, bool isBuy, double stopPrice, double limitPrice)
   :
-  Order(qty, isBuy),
+  Order(orderBook, qty, isBuy),
   m_stopPrice(stopPrice),
   m_limitPrice(limitPrice),
   m_triggered(false)

@@ -1,5 +1,6 @@
 #pragma once
 #include "Order.hpp"
+#include "OrderBook.hpp"
 #include <string>
 
 class StopOrder : public Order
@@ -9,7 +10,7 @@ class StopOrder : public Order
     bool m_triggered;
 
   public:
-    StopOrder(int qty, bool isBuy, double stopPrice);
+    StopOrder(OrderBook& orderBook, int qty, bool isBuy, double stopPrice);
     bool checkTrigger();
     void execute();
 };

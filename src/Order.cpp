@@ -1,19 +1,18 @@
 #include "Order.hpp"
+#include "OrderBook.hpp"
 #include <string>
 #include <iostream>
 #include <ctime>
 
 // Constructor
-Order::Order(int qty, bool isBuy)
-{
-  // Get the timestamp
-  m_submitTime = std::time(0);
-  // Get the Order ID
-  m_orderId = 101;
-
-  m_qty = qty;
-  m_isBuy = isBuy;
-}
+Order::Order(OrderBook& orderBook, int qty, bool isBuy)
+  :
+  m_orderBook(orderBook),
+  m_submitTime(std::time(0)),
+  m_orderId(orderBook.generateOrderId()),
+  m_qty(qty),
+  m_isBuy(isBuy)
+{}
 
 // Methods
 void Order::execute()

@@ -1,7 +1,7 @@
 Current Todo List:
-1. Automatic Order ID Generation - remove ID assignment from the constructor of classes - this should be done automatically 
 
 DONE:
+- Automatic ID Generation Done
 - Automatic Timestamp Generation
 - Removed Timestamp from Order Constructor
 - Removed ID from Order Constructor

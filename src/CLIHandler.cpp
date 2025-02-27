@@ -1,6 +1,7 @@
 #include "CLIHandler.hpp"
 #include <iostream>
 #include <iomanip>
+#include "OrderBook.hpp"
 #include "MarketOrder.hpp"
 #include "LimitOrder.hpp"
 #include "StopOrder.hpp"
@@ -36,10 +37,11 @@ const std::string INVALID_MSG = "Invalid values entered. Type 'HELP' to see the 
 // Incorrect Formatting Error Message
 const std::string FORMAT_ERROR_MSG = "Command is incorrectly formatted. Type 'HELP' to see the correct format of the command.";
 
-// Constructor of the CLIHandler class
-CLIHandler::CLIHandler() {
-    std::cout << "\nLimit Order Book \n" << std::endl;
-}
+// Constructor
+CLIHandler::CLIHandler(OrderBook& orderBook)
+  :
+  m_orderBook(orderBook)
+{}
 
 // Check if the side is valid
 bool CLIHandler::isValidSide(std::string &side)
@@ -172,7 +174,7 @@ void CLIHandler::handleLimitOrder(std::vector<std::string> &tokens)
   }
 
   // Create LimitOrder
-  LimitOrder limitOrder(qty, isBuy, price);
+  LimitOrder limitOrder(m_orderBook, qty, isBuy, price);
   limitOrder.execute();
 }
 
@@ -198,7 +200,7 @@ void CLIHandler::handleMarketOrder(std::vector<std::string> &tokens)
   }
 
   // Create the MarketOrder
-  MarketOrder marketOrder(qty, isBuy);
+  MarketOrder marketOrder(m_orderBook, qty, isBuy);
   marketOrder.execute();
 }
 
@@ -225,7 +227,7 @@ void CLIHandler::handleStopOrder(std::vector<std::string> &tokens)
   }
 
   // Create Stop Order
-  StopOrder stopOrder(qty, isBuy, stop_price);
+  StopOrder stopOrder(m_orderBook, qty, isBuy, stop_price);
   stopOrder.execute();
 }
 
@@ -253,7 +255,7 @@ void CLIHandler::handleStopLimitOrder(std::vector<std::string> &tokens)
   }
 
   // Create StopLimitOrder
-  StopLimitOrder stopLimitOrder(qty, isBuy, stop_price, limit_price);
+  StopLimitOrder stopLimitOrder(m_orderBook, qty, isBuy, stop_price, limit_price);
   stopLimitOrder.execute();
 }
 
@@ -281,7 +283,7 @@ void CLIHandler::handleIcebergOrder(std::vector<std::string> &tokens)
   }
 
   // Create Iceberg Order
-  IcebergOrder icebergOrder(total_qty, isBuy, displayed_qty, limit_price); 
+  IcebergOrder icebergOrder(m_orderBook, total_qty, isBuy, displayed_qty, limit_price); 
   icebergOrder.execute();
 }
 
