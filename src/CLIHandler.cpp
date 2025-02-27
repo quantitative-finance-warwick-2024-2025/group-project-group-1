@@ -172,10 +172,9 @@ void CLIHandler::handleLimitOrder(std::vector<std::string> &tokens)
   double price { std::stod(tokens[3]) };
   int qty { std::stoi(tokens[2]) };
   bool isBuy { tokens[1] == "BUY" };
-  std::string timeStamp { "2024-01-01" };
 
   // Create LimitOrder
-  LimitOrder limitOrder(123, qty, isBuy, timeStamp, price);
+  LimitOrder limitOrder(qty, isBuy, price);
   limitOrder.execute();
 }
 
@@ -199,10 +198,9 @@ void CLIHandler::handleMarketOrder(std::vector<std::string> &tokens)
   // Everything is validated
   int qty { std::stoi(tokens[2]) };
   bool isBuy { tokens[1] == "BUY" };
-  std::string timeStamp { "2024-01-01" };
 
   // Create the MarketOrder
-  MarketOrder marketOrder(123, qty, isBuy, timeStamp);
+  MarketOrder marketOrder(qty, isBuy);
   marketOrder.execute();
 }
 
@@ -234,10 +232,9 @@ void CLIHandler::handleStopOrder(std::vector<std::string> &tokens)
   double stop_price { std::stod(tokens[3]) };
   int qty { std::stoi(tokens[2]) };
   bool isBuy { tokens[1] == "BUY" };
-  std::string timeStamp { "2024-01-01" };  
 
   // Create Stop Order
-  StopOrder stopOrder(123, qty, isBuy, timeStamp, stop_price, false);
+  StopOrder stopOrder(qty, isBuy, stop_price);
   stopOrder.execute();
 }
 
@@ -277,10 +274,9 @@ void CLIHandler::handleStopLimitOrder(std::vector<std::string> &tokens)
   double limit_price { std::stod(tokens[4]) };
   int qty { std::stoi(tokens[2]) };
   bool isBuy { tokens[1] == "BUY" };
-  std::string timeStamp { "2024-01-01" };
   
   // Create StopLimitOrder
-  StopLimitOrder stopLimitOrder(123, qty, isBuy, timeStamp, stop_price, limit_price, false);
+  StopLimitOrder stopLimitOrder(qty, isBuy, stop_price, limit_price);
   stopLimitOrder.execute();
 }
 
@@ -320,10 +316,9 @@ void CLIHandler::handleIcebergOrder(std::vector<std::string> &tokens)
   int total_qty { std::stoi(tokens[2]) };
   double displayed_qty { std::stod(tokens[3]) };
   double limit_price { std::stod(tokens[4]) };
-  std::string timeStamp { "2024-01-01" };
 
   // Create Iceberg Order
-  IcebergOrder icebergOrder(123, total_qty, isBuy, timeStamp, displayed_qty, total_qty - displayed_qty, limit_price); 
+  IcebergOrder icebergOrder(total_qty, isBuy, displayed_qty, limit_price); 
   icebergOrder.execute();
 }
 

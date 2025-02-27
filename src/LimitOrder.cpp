@@ -3,7 +3,7 @@
 #include <iostream>
 
 // Constructor of Limit Order
-LimitOrder::LimitOrder(int orderId, int qty, bool isBuy, std::string& timeStamp, double limitPrice)
+LimitOrder::LimitOrder(int qty, bool isBuy, double limitPrice)
   :
   Order(qty, isBuy),
   m_limitPrice(limitPrice)

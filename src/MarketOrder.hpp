@@ -4,6 +4,6 @@
 class MarketOrder : public Order
 {
   public:
-    MarketOrder(int orderId, int qty, bool isBuy, std::string& timeStamp);
+    MarketOrder(int qty, bool isBuy);
     void execute();
 };

@@ -9,7 +9,7 @@ class StopLimitOrder : public Order
     bool m_triggered;
 
   public:
-    StopLimitOrder(int orderId, int qty, bool isBuy, std::string& timeStamp, double stopPrice, double limitPrice, bool triggered);
+    StopLimitOrder(int qty, bool isBuy, double stopPrice, double limitPrice);
     bool checkTrigger();
     void execute();
 };

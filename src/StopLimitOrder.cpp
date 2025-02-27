@@ -3,12 +3,12 @@
 #include "StopLimitOrder.hpp"
 
 // Create the constructor for the stop limit order
-StopLimitOrder::StopLimitOrder(int orderId, int qty, bool isBuy, std::string& timeStamp, double stopPrice, double limitPrice, bool triggered)
+StopLimitOrder::StopLimitOrder(int qty, bool isBuy, double stopPrice, double limitPrice)
   :
   Order(qty, isBuy),
   m_stopPrice(stopPrice),
   m_limitPrice(limitPrice),
-  m_triggered(triggered)
+  m_triggered(false)
 {}
 
 // Method for executing the stop limit order
