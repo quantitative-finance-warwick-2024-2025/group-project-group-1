@@ -3,7 +3,7 @@
 #include <string>
 
 // Constructor of MarketOrder
-MarketOrder::MarketOrder(int orderId, int qty, bool isBuy, std::string& timeStamp)
+MarketOrder::MarketOrder(int qty, bool isBuy)
   : 
   Order(qty, isBuy)
 {}  

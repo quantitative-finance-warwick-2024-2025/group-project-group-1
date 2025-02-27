@@ -3,11 +3,10 @@
 #include "IcebergOrder.hpp"
 
 // Create constructor for Iceberg Order
-IcebergOrder::IcebergOrder(int orderId, int qty, bool isBuy, std::string& timeStamp, int displayQty, int hiddenQty, double limitPrice)
+IcebergOrder::IcebergOrder(int qty, bool isBuy, int displayQty, double limitPrice)
   :
   Order(qty, isBuy),
   m_displayQty(displayQty),
-  m_hiddenQty(hiddenQty),
   m_limitPrice(limitPrice)
 {}
 

@@ -11,26 +11,24 @@
 
 int main()
 {
-  std::string timestamp = "2024-01-01";
-  
   // Market Order Testing
-  MarketOrder myMarketOrder(123, 150, false, timestamp);
+  MarketOrder myMarketOrder(150, false);
   myMarketOrder.execute();
 
   // Limit Order Testing
-  LimitOrder myLimitOrder(123, 150, false, timestamp, 1254.50);
+  LimitOrder myLimitOrder(150, false, 1254.50);
   myLimitOrder.execute();
 
   // Stop Order Testing
-  StopOrder myStopOrder(123, 123, false, timestamp, 123.50, false);
+  StopOrder myStopOrder(123, false, 123.50);
   myStopOrder.execute();
 
   // Stop Limit Order Testing
-  StopLimitOrder myStopLimitOrder(123, 123, false, timestamp, 125.50, 125, false);
+  StopLimitOrder myStopLimitOrder(123, false, 125, 100);
   myStopLimitOrder.execute();
 
   // Iceberg Order Testing
-  IcebergOrder myIcebergOrder(123, 123, false, timestamp, 100, 1000, 123.30);
+  IcebergOrder myIcebergOrder(1000, false, 100, 12.50);
   myIcebergOrder.execute();
 
   // Stop Limit Order Testing

@@ -7,6 +7,6 @@ class LimitOrder : public Order
     double m_limitPrice;
 
   public:
-    LimitOrder(int orderId, int qty, bool isBuy, std::string& timeStamp, double limiPrice);
+    LimitOrder(int qty, bool isBuy, double limitPrice);
     void execute();
 };

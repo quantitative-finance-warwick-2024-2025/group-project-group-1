@@ -3,11 +3,11 @@
 #include <iostream>
 
 // Create the constructor of the Stop Order
-StopOrder::StopOrder(int orderId, int qty, bool isBuy, std::string& timeStamp, double stopPrice, bool triggered)
+StopOrder::StopOrder(int qty, bool isBuy, double stopPrice)
   :
   Order(qty, isBuy),
   m_stopPrice(stopPrice),
-  m_triggered(triggered)
+  m_triggered(false)
 {}
 
 // Method for executing the StopOrder
