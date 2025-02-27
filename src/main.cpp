@@ -5,6 +5,7 @@
 #include "StopOrder.hpp"
 #include "StopLimitOrder.hpp"
 #include "IcebergOrder.hpp"
+#include "Order.hpp"
 #include <string>
 
 int main()
@@ -33,6 +34,6 @@ int main()
 
   // Stop Limit Order Testing
 
-  //CLIHandler cliHandler;
-  //cliHandler.run();
+  CLIHandler cliHandler;
+  cliHandler.run();
 }

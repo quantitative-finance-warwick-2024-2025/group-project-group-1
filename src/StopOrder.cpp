@@ -13,7 +13,7 @@ StopOrder::StopOrder(int orderId, int qty, bool isBuy, std::string& timeStamp, d
 // Method for executing the StopOrder
 void StopOrder::execute()
 {
-  std::cout << "Stop Order with QTY = " << m_qty << " and stop price = " << m_stopPrice << std::endl;
+  std::cout << "Stop Market Order " << (m_isBuy ? "to buy" : "to sell") << " " << m_qty << " with stop price " << m_stopPrice << std::endl;
 }
 
 // Method for checking if StopOrder has been triggered 

@@ -12,5 +12,5 @@ LimitOrder::LimitOrder(int orderId, int qty, bool isBuy, std::string& timeStamp,
 // Method to execute limit order
 void LimitOrder::execute()
 {
-  std::cout << "Limit Order with Quantity = " << m_qty << " and limit price = " << m_limitPrice << std::endl;
+  std::cout << "Limit order " << (m_isBuy ? "to buy" : "to sell") << " " << m_qty << " with limit price " << m_limitPrice << std::endl;
 }
