@@ -1,11 +1,12 @@
 #include "MarketOrder.hpp"
+#include "OrderBook.hpp"
 #include <iostream>
 #include <string>
 
 // Constructor of MarketOrder
-MarketOrder::MarketOrder(int qty, bool isBuy)
+MarketOrder::MarketOrder(OrderBook& orderBook, int qty, bool isBuy)
   : 
-  Order(qty, isBuy)
+  Order(orderBook, qty, isBuy)
 {}  
 
 // Execute Method of MarketOrder
