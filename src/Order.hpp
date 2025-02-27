@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <ctime>
 
 class Order
 {
@@ -7,9 +8,10 @@ class Order
     int m_orderId;
     int m_qty;
     bool m_isBuy;
-    std::string m_timeStamp;
+    std::time_t m_submitTime;
   
   public:
-    Order(int orderId, int qty, bool isBuy, std::string& timeStamp);
+    Order(int qty, bool isBuy);
     virtual void execute();
+    std::string getSubmitTime();
 };
