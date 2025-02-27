@@ -11,5 +11,5 @@ MarketOrder::MarketOrder(int orderId, int qty, bool isBuy, std::string& timeStam
 // Execute Method of MarketOrder
 void MarketOrder::execute()
 {
-  std::cout << "Market Order of Quantity = " << m_qty << std::endl;
+  std::cout << "Market Order to " << (m_isBuy ? "to buy" : "to sell") << " " << m_qty << " shares." << std::endl;
 }

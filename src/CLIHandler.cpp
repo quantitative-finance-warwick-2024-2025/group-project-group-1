@@ -1,6 +1,11 @@
 #include "CLIHandler.hpp"
 #include <iostream>
 #include <iomanip>
+#include "MarketOrder.hpp"
+#include "LimitOrder.hpp"
+#include "StopOrder.hpp"
+#include "StopLimitOrder.hpp"
+#include "IcebergOrder.hpp"
 
 // Struct to hold command information
 struct CommandInfo
@@ -142,169 +147,184 @@ void CLIHandler::run()
 // Handle Limit Orders
 void CLIHandler::handleLimitOrder(std::vector<std::string> &tokens)
 {
-    // Validate Side
-    if (!isValidSide(tokens[1]))
-    {
-        std::cout << "Second argument must be BUY or SELL" << std::endl;
-        return;
-    }
+  // Validate Side
+  if (!isValidSide(tokens[1]))
+  {
+    std::cout << "Second argument must be BUY or SELL" << std::endl;
+    return;
+  }
 
-    // Validate quantity is int
-    if (!isValidInt(tokens[2]))
-    {
-        std::cout << "Quantity must be an integer" << std::endl;
-        return;
-    }
+  // Validate quantity is int
+  if (!isValidInt(tokens[2]))
+  {
+    std::cout << "Quantity must be an integer" << std::endl;
+    return;
+  }
 
-    // Validate price is double
-    if (!isValidDouble(tokens[3]))
-    {
-        std::cout << "Price must be a double" << std::endl;
-        return;
-    }
+  // Validate price is double
+  if (!isValidDouble(tokens[3]))
+  {
+    std::cout << "Price must be a double" << std::endl;
+    return;
+  }
 
-    // Everything is validated
-    double price { std::stod(tokens[3]) };
-    int quantity { std::stoi(tokens[2]) };
-    bool isBuy { tokens[1] == "BUY" };
+  // Everything is validated
+  double price { std::stod(tokens[3]) };
+  int qty { std::stoi(tokens[2]) };
+  bool isBuy { tokens[1] == "BUY" };
+  std::string timeStamp { "2024-01-01" };
 
-    std::cout << "Limit order " << (isBuy ? "to buy" : "to sell") << " " << quantity << " at " << price << std::endl;
+  // Create LimitOrder
+  LimitOrder limitOrder(123, qty, isBuy, timeStamp, price);
+  limitOrder.execute();
 }
 
 // Handle Market Orders
 void CLIHandler::handleMarketOrder(std::vector<std::string> &tokens)
 {
-    // Validate Side
-    if (!isValidSide(tokens[1]))
-    {
-        std::cout << "Second argument must be BUY or SELL" << std::endl;
-        return;
-    }
+  // Validate Side
+  if (!isValidSide(tokens[1]))
+  {
+    std::cout << "Second argument must be BUY or SELL" << std::endl;
+    return;
+  }
 
-    // Validate quantity is int
-    if (!isValidInt(tokens[2]))
-    {
-        std::cout << "Quantity must be an integer" << std::endl;
-        return;
-    }
+  // Validate quantity is int
+  if (!isValidInt(tokens[2]))
+  {
+    std::cout << "Quantity must be an integer" << std::endl;
+    return;
+  }
 
-    // Everything is validated
-    int quantity { std::stoi(tokens[2]) };
-    bool isBuy { tokens[1] == "BUY" };
+  // Everything is validated
+  int qty { std::stoi(tokens[2]) };
+  bool isBuy { tokens[1] == "BUY" };
+  std::string timeStamp { "2024-01-01" };
 
-    std::cout << "Market order " << (isBuy ? "to buy" : "to sell") << " " << quantity << std::endl;
+  // Create the MarketOrder
+  MarketOrder marketOrder(123, qty, isBuy, timeStamp);
+  marketOrder.execute();
 }
 
 // Handle Stop Orders
 void CLIHandler::handleStopOrder(std::vector<std::string> &tokens)
 {
-    // Validate Side
-    if (!isValidSide(tokens[1]))
-    {
-        std::cout << "Second argument must be BUY or SELL" << std::endl;
-        return;
-    }
+  // Validate Side
+  if (!isValidSide(tokens[1]))
+  {
+    std::cout << "Second argument must be BUY or SELL" << std::endl;
+    return;
+  }
 
-    // Validate quantity is int
-    if (!isValidInt(tokens[2]))
-    {
-        std::cout << "Quantity must be an integer" << std::endl;
-        return;
-    }
+  // Validate quantity is int
+  if (!isValidInt(tokens[2]))
+  {
+    std::cout << "Quantity must be an integer" << std::endl;
+    return;
+  }
 
-    // Validate stop price is double
-    if (!isValidDouble(tokens[3]))
-    {
-        std::cout << "Stop Price must be a double" << std::endl;
-        return;
-    }
+  // Validate stop price is double
+  if (!isValidDouble(tokens[3]))
+  {
+    std::cout << "Stop Price must be a double" << std::endl;
+    return;
+  }
 
-    // Everything is validated
-    double stop_price { std::stod(tokens[3]) };
-    int quantity { std::stoi(tokens[2]) };
-    bool isBuy { tokens[1] == "BUY" };
+  // Everything is validated
+  double stop_price { std::stod(tokens[3]) };
+  int qty { std::stoi(tokens[2]) };
+  bool isBuy { tokens[1] == "BUY" };
+  std::string timeStamp { "2024-01-01" };  
 
-    std::cout << "Stop Market order " << (isBuy ? "to buy" : "to sell") << " " << quantity << " with stop price " << stop_price << std::endl;
+  // Create Stop Order
+  StopOrder stopOrder(123, qty, isBuy, timeStamp, stop_price, false);
+  stopOrder.execute();
 }
 
 // Handle Stop Limit Orders
 void CLIHandler::handleStopLimitOrder(std::vector<std::string> &tokens) 
 {
-    // Validate Side
-    if (!isValidSide(tokens[1]))
-    {
-        std::cout << "Second argument must be BUY or SELL" << std::endl;
-        return;
-    }
+  // Validate Side
+  if (!isValidSide(tokens[1]))
+  {
+    std::cout << "Second argument must be BUY or SELL" << std::endl;
+    return;
+  }
 
-    // Validate quantity is int
-    if (!isValidInt(tokens[2]))
-    {
-        std::cout << "Quantity must be an integer" << std::endl;
-        return;
-    }
+  // Validate quantity is int
+  if (!isValidInt(tokens[2]))
+  {
+    std::cout << "Quantity must be an integer" << std::endl;
+    return;
+  }
 
-    // Validate stop price is double
-    if (!isValidDouble(tokens[3]))
-    {
-        std::cout << "Stop Price must be a double" << std::endl;
-        return;
-    }
+  // Validate stop price is double
+  if (!isValidDouble(tokens[3]))
+  {
+    std::cout << "Stop Price must be a double" << std::endl;
+    return;
+  }
 
-    // Validate limit price is double
-    if (!isValidDouble(tokens[4]))
-    {
-        std::cout << "Limit Price must be a double" << std::endl;
-        return;
-    }
+  // Validate limit price is double
+  if (!isValidDouble(tokens[4]))
+  {
+    std::cout << "Limit Price must be a double" << std::endl;
+    return;
+  }
 
-    // Everything is validated
-    double stop_price { std::stod(tokens[3]) };
-    double limit_price { std::stod(tokens[4]) };
-    int quantity { std::stoi(tokens[2]) };
-    bool isBuy { tokens[1] == "BUY" };
-
-    std::cout << "Stop Limit order " << (isBuy ? "to buy" : "to sell") << " " << quantity << " with stop price " << stop_price << " and limit price " << limit_price << std::endl;
+  // Everything is validated
+  double stop_price { std::stod(tokens[3]) };
+  double limit_price { std::stod(tokens[4]) };
+  int qty { std::stoi(tokens[2]) };
+  bool isBuy { tokens[1] == "BUY" };
+  std::string timeStamp { "2024-01-01" };
+  
+  // Create StopLimitOrder
+  StopLimitOrder stopLimitOrder(123, qty, isBuy, timeStamp, stop_price, limit_price, false);
+  stopLimitOrder.execute();
 }
 
 // Handle Iceberg Limit Orders
 void CLIHandler::handleIcebergOrder(std::vector<std::string> &tokens) 
 {
-    // Validate Side
-    if (!isValidSide(tokens[1]))
-    {
-        std::cout << "Second argument must be BUY or SELL" << std::endl;
-        return;
-    }
+  // Validate Side
+  if (!isValidSide(tokens[1]))
+  {
+    std::cout << "Second argument must be BUY or SELL" << std::endl;
+    return;
+  }
 
-    // Validate total quantity is int
-    if (!isValidInt(tokens[2]))
-    {
-        std::cout << "Total Quantity must be an integer" << std::endl;
-        return;
-    }
+  // Validate total quantity is int
+  if (!isValidInt(tokens[2]))
+  {
+    std::cout << "Total Quantity must be an integer" << std::endl;
+    return;
+  }
 
-    // Validate displayed quantity is int
-    if (!isValidInt(tokens[3]))
-    {
-        std::cout << "Displayed Quantity must be an integer" << std::endl;
-        return;
-    }
+  // Validate displayed quantity is int
+  if (!isValidInt(tokens[3]))
+  {
+     std::cout << "Displayed Quantity must be an integer" << std::endl;
+    return;
+  }
 
-    // Validate price is double
-    if (!isValidDouble(tokens[4]))
-    {
-        std::cout << "Limit Price must be an integer" << std::endl;
-        return;
-    }
+  // Validate price is double
+  if (!isValidDouble(tokens[4]))
+  {
+    std::cout << "Limit Price must be an integer" << std::endl;
+    return;
+  }
 
-    // Everything is validated
-    bool isBuy { tokens[1] == "BUY" };
-    int total_qty { std::stoi(tokens[2]) };
-    double displayed_qty { std::stod(tokens[3]) };
-    double limit_price { std::stod(tokens[4]) };
+  // Everything is validated
+  bool isBuy { tokens[1] == "BUY" };
+  int total_qty { std::stoi(tokens[2]) };
+  double displayed_qty { std::stod(tokens[3]) };
+  double limit_price { std::stod(tokens[4]) };
+  std::string timeStamp { "2024-01-01" };
 
-    std::cout << "Iceberg Limit order " << (isBuy ? "to buy" : "to sell") << " " << total_qty << " with chunks of " << displayed_qty << " and limit price " << limit_price << std::endl;
+  // Create Iceberg Order
+  IcebergOrder icebergOrder(123, total_qty, isBuy, timeStamp, displayed_qty, total_qty - displayed_qty, limit_price); 
+  icebergOrder.execute();
 }
 
 // Display the help menu for the user

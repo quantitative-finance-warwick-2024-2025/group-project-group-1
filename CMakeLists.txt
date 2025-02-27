@@ -11,7 +11,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 add_compile_options(-Wall -Wextra)
 
 # Add more source files here if needed
-set(SRC_FILES ${CMAKE_SOURCE_DIR}/src/CLIHandler.cpp)
+set(SRC_FILES ${CMAKE_SOURCE_DIR}/src/CLIHandler.cpp ${CMAKE_SOURCE_DIR}/src/Order.cpp ${CMAKE_SOURCE_DIR}/src/OrderBook.cpp ${CMAKE_SOURCE_DIR}/src/MarketOrder.cpp ${CMAKE_SOURCE_DIR}/src/LimitOrder.cpp ${CMAKE_SOURCE_DIR}/src/StopOrder.cpp ${CMAKE_SOURCE_DIR}/src/StopLimitOrder.cpp ${CMAKE_SOURCE_DIR}/src/IcebergOrder.cpp)
 
 add_executable(my_program ${SRC_FILES} ${CMAKE_SOURCE_DIR}/src/main.cpp)
 

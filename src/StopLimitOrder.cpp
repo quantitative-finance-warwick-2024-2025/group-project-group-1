@@ -14,7 +14,7 @@ StopLimitOrder::StopLimitOrder(int orderId, int qty, bool isBuy, std::string& ti
 // Method for executing the stop limit order
 void StopLimitOrder::execute()
 {
-  std::cout << "Stop Limit Order with Limit Price = " << m_limitPrice << " and qty = " << m_qty << std::endl;
+  std::cout << "Stop Limit Order " << (m_isBuy ? "to buy" : "to sell") << " " << m_qty << " with stop price " << m_stopPrice << " and limit price " << m_limitPrice << std::endl;
 }
 
 // Method for checking if the limit order has been triggered
