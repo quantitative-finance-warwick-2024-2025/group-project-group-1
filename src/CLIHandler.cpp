@@ -31,6 +31,11 @@ const std::vector<CommandInfo> commands = {
     {"EXIT",      "",                                                       "Exit the application"}
 };
 
+// Invalid Numbers Error Message
+const std::string INVALID_MSG = "Invalid values entered. Type 'HELP' to see the arguments of the command.";
+// Incorrect Formatting Error Message
+const std::string FORMAT_ERROR_MSG = "Command is incorrectly formatted. Type 'HELP' to see the correct format of the command.";
+
 // Constructor of the CLIHandler class
 CLIHandler::CLIHandler() {
     std::cout << "\nLimit Order Book \n" << std::endl;
@@ -147,24 +152,10 @@ void CLIHandler::run()
 // Handle Limit Orders
 void CLIHandler::handleLimitOrder(std::vector<std::string> &tokens)
 {
-  // Validate Side
-  if (!isValidSide(tokens[1]))
+  // Validation
+  if (!isValidSide(tokens[1]) || !isValidInt(tokens[2]) || !isValidDouble(tokens[3]))
   {
-    std::cout << "Second argument must be BUY or SELL" << std::endl;
-    return;
-  }
-
-  // Validate quantity is int
-  if (!isValidInt(tokens[2]))
-  {
-    std::cout << "Quantity must be an integer" << std::endl;
-    return;
-  }
-
-  // Validate price is double
-  if (!isValidDouble(tokens[3]))
-  {
-    std::cout << "Price must be a double" << std::endl;
+    std::cout << FORMAT_ERROR_MSG << std::endl;
     return;
   }
 
@@ -172,6 +163,13 @@ void CLIHandler::handleLimitOrder(std::vector<std::string> &tokens)
   double price { std::stod(tokens[3]) };
   int qty { std::stoi(tokens[2]) };
   bool isBuy { tokens[1] == "BUY" };
+
+  // Price and Qty must be positive
+  if (price < 0 || qty <= 0)
+  {
+    std::cout << INVALID_MSG << std::endl;
+    return;
+  }
 
   // Create LimitOrder
   LimitOrder limitOrder(qty, isBuy, price);
@@ -181,23 +179,23 @@ void CLIHandler::handleLimitOrder(std::vector<std::string> &tokens)
 // Handle Market Orders
 void CLIHandler::handleMarketOrder(std::vector<std::string> &tokens)
 {
-  // Validate Side
-  if (!isValidSide(tokens[1]))
+  // Validation
+  if (!isValidSide(tokens[1]) || !isValidInt(tokens[2]))
   {
-    std::cout << "Second argument must be BUY or SELL" << std::endl;
-    return;
-  }
-
-  // Validate quantity is int
-  if (!isValidInt(tokens[2]))
-  {
-    std::cout << "Quantity must be an integer" << std::endl;
+    std::cout << FORMAT_ERROR_MSG << std::endl;
     return;
   }
 
   // Everything is validated
   int qty { std::stoi(tokens[2]) };
   bool isBuy { tokens[1] == "BUY" };
+
+  // Quantity must be positive
+  if (qty <= 0)
+  {
+    std::cout << INVALID_MSG << std::endl;
+    return;
+  }
 
   // Create the MarketOrder
   MarketOrder marketOrder(qty, isBuy);
@@ -207,24 +205,10 @@ void CLIHandler::handleMarketOrder(std::vector<std::string> &tokens)
 // Handle Stop Orders
 void CLIHandler::handleStopOrder(std::vector<std::string> &tokens)
 {
-  // Validate Side
-  if (!isValidSide(tokens[1]))
+  // Validation
+  if (!isValidSide(tokens[1]) || !isValidInt(tokens[2]) || !isValidDouble(tokens[3]))
   {
-    std::cout << "Second argument must be BUY or SELL" << std::endl;
-    return;
-  }
-
-  // Validate quantity is int
-  if (!isValidInt(tokens[2]))
-  {
-    std::cout << "Quantity must be an integer" << std::endl;
-    return;
-  }
-
-  // Validate stop price is double
-  if (!isValidDouble(tokens[3]))
-  {
-    std::cout << "Stop Price must be a double" << std::endl;
+    std::cout << FORMAT_ERROR_MSG << std::endl;
     return;
   }
 
@@ -232,6 +216,13 @@ void CLIHandler::handleStopOrder(std::vector<std::string> &tokens)
   double stop_price { std::stod(tokens[3]) };
   int qty { std::stoi(tokens[2]) };
   bool isBuy { tokens[1] == "BUY" };
+
+  // qty and stop price must be positive
+  if (qty <= 0 || stop_price < 0)
+  {
+    std::cout << INVALID_MSG << std::endl;
+    return;
+  }
 
   // Create Stop Order
   StopOrder stopOrder(qty, isBuy, stop_price);
@@ -241,31 +232,10 @@ void CLIHandler::handleStopOrder(std::vector<std::string> &tokens)
 // Handle Stop Limit Orders
 void CLIHandler::handleStopLimitOrder(std::vector<std::string> &tokens) 
 {
-  // Validate Side
-  if (!isValidSide(tokens[1]))
+  // Validation
+  if (!isValidSide(tokens[1]) || !isValidInt(tokens[2]) || !isValidDouble(tokens[3]) || !isValidDouble(tokens[4]))
   {
-    std::cout << "Second argument must be BUY or SELL" << std::endl;
-    return;
-  }
-
-  // Validate quantity is int
-  if (!isValidInt(tokens[2]))
-  {
-    std::cout << "Quantity must be an integer" << std::endl;
-    return;
-  }
-
-  // Validate stop price is double
-  if (!isValidDouble(tokens[3]))
-  {
-    std::cout << "Stop Price must be a double" << std::endl;
-    return;
-  }
-
-  // Validate limit price is double
-  if (!isValidDouble(tokens[4]))
-  {
-    std::cout << "Limit Price must be a double" << std::endl;
+    std::cout << FORMAT_ERROR_MSG << std::endl;
     return;
   }
 
@@ -275,6 +245,13 @@ void CLIHandler::handleStopLimitOrder(std::vector<std::string> &tokens)
   int qty { std::stoi(tokens[2]) };
   bool isBuy { tokens[1] == "BUY" };
   
+  // stop_price, limit_price must be non-negative and qty positive
+  if (stop_price < 0 || limit_price < 0 || qty <= 0)
+  {
+    std::cout << INVALID_MSG << std::endl;
+    return;
+  }
+
   // Create StopLimitOrder
   StopLimitOrder stopLimitOrder(qty, isBuy, stop_price, limit_price);
   stopLimitOrder.execute();
@@ -283,31 +260,10 @@ void CLIHandler::handleStopLimitOrder(std::vector<std::string> &tokens)
 // Handle Iceberg Limit Orders
 void CLIHandler::handleIcebergOrder(std::vector<std::string> &tokens) 
 {
-  // Validate Side
-  if (!isValidSide(tokens[1]))
+  // Input Validation
+  if (!isValidSide(tokens[1]) || !isValidInt(tokens[2]) || !isValidInt(tokens[3]) || !isValidDouble(tokens[4]))
   {
-    std::cout << "Second argument must be BUY or SELL" << std::endl;
-    return;
-  }
-
-  // Validate total quantity is int
-  if (!isValidInt(tokens[2]))
-  {
-    std::cout << "Total Quantity must be an integer" << std::endl;
-    return;
-  }
-
-  // Validate displayed quantity is int
-  if (!isValidInt(tokens[3]))
-  {
-     std::cout << "Displayed Quantity must be an integer" << std::endl;
-    return;
-  }
-
-  // Validate price is double
-  if (!isValidDouble(tokens[4]))
-  {
-    std::cout << "Limit Price must be an integer" << std::endl;
+    std::cout << FORMAT_ERROR_MSG << std::endl;
     return;
   }
 
@@ -316,6 +272,13 @@ void CLIHandler::handleIcebergOrder(std::vector<std::string> &tokens)
   int total_qty { std::stoi(tokens[2]) };
   double displayed_qty { std::stod(tokens[3]) };
   double limit_price { std::stod(tokens[4]) };
+
+  // displayQty must be less than or equal to total_qty, and price must be positive
+  if (displayed_qty > total_qty || limit_price < 0 || total_qty <= 0 || displayed_qty <= 0)
+  {
+    std::cout << INVALID_MSG << std::endl;
+    return;
+  }
 
   // Create Iceberg Order
   IcebergOrder icebergOrder(total_qty, isBuy, displayed_qty, limit_price); 
