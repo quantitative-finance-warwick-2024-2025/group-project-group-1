@@ -23,6 +23,7 @@ const std::vector<CommandInfo> commands = {
     {"STOP",      "[BUY|SELL] <quantity> <stop_price>",                     "Place a stop order"},
     {"STOPLIMIT", "[BUY|SELL] <quantity> <stop_price> <limit_price>",       "Place a stop-limit order"},
     {"ICEBERG",   "[BUY|SELL] <total_quantity> <displayed_qty> <price>",    "Place an iceberg order"},
+    {"VIEW",      "<order_id>",                                             "View an order by ID"},
     {"CANCEL",    "<order_id>",                                             "Cancel an order by ID"},
     {"BOOK",      "",                                                       "Show the full order book"},
     {"DEPTH",     "[N]",                                                    "Show market depth for N levels (default 5)"},
@@ -83,6 +84,7 @@ void CLIHandler::run()
         else if (tokens.size() == 5 && command == "STOPLIMIT") { handleStopLimitOrder(tokens); }
         else if (tokens.size() == 5 && command == "ICEBERG") { handleIcebergOrder(tokens); }
         else if (tokens.size() == 2 && command == "CANCEL") { std::cout << "CANCEL ORDER" << std::endl; }
+        else if (tokens.size() == 2 && command == "VIEW") { handleViewOrder(tokens); }
         else if (tokens.size() == 1 && command == "BOOK") { m_orderBook.getBookSnapshot(); }
         else if (tokens.size() >= 1 && tokens.size() <= 2 && command == "DEPTH") { std::cout << "DEPTH" << std::endl; }
         else if (tokens.size() == 1 && command == "SPREAD") { handleMarketSpread(); }
@@ -289,6 +291,32 @@ void CLIHandler::handleMarketSpread()
 void CLIHandler::handleBest()
 {
   std::cout << "Best\n";
+}
+
+// Display details on order by id
+void CLIHandler::handleViewOrder(std::vector<std::string> tokens)
+{
+  if (!isValidInt(tokens[1]))
+  {
+    std::cout << "OrderID must be an integer\n"; 
+    return;
+  }
+  int orderId = std::stoi(tokens[1]);
+  std::shared_ptr<Order> viewOrder = m_orderBook.getOrderById(orderId);
+  if (viewOrder == nullptr)
+  {
+    std::cout << "Order with ID " << orderId << " not found\n";
+    return;
+  }
+  // Print summmary of the order
+  std::cout << "Summary of Order " << viewOrder->getOrderId() << std::endl;
+  std::cout << "-----------------------------------------------\n";
+  // Print order is buy or sell
+  std::cout << "Order Type: " << (viewOrder->isBuy() ? "Buy Order" : "Sell Order") << std::endl;
+  std::cout << "Limit Price: " << viewOrder->getLimitPrice() << std::endl;
+  std::cout << "Remaining Quantity: " << viewOrder->getQty() << std::endl;
+  std::cout << "Order Submitted at: " << viewOrder->getSubmitTime() << std::endl;
+  std::cout << "-----------------------------------------------\n";
 }
 
 // Parse the arguments of the command to strip the whitespace

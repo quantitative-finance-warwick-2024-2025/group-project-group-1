@@ -25,6 +25,7 @@ class CLIHandler {
     void handleStopLimitOrder(std::vector<std::string> tokens);
     void handleIcebergOrder(std::vector<std::string> tokens);
     // Handle other commands
+    void handleViewOrder(std::vector<std::string> tokens);
     void handleMarketSpread();
     void handleBest();
 
