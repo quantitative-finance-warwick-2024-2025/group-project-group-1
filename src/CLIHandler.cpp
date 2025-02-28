@@ -26,15 +26,15 @@ const std::vector<CommandInfo> commands = {
     {"CANCEL",    "<order_id>",                                             "Cancel an order by ID"},
     {"BOOK",      "",                                                       "Show the full order book"},
     {"DEPTH",     "[N]",                                                    "Show market depth for N levels (default 5)"},
+    {"SPREAD",    "",                                                       "Show market spread"},
     {"BEST",      "",                                                       "Show the best bid and ask"},
     {"HISTORY",   "",                                                       "Show order history and executions"},
     {"HELP",      "",                                                       "Display this help menu"},
     {"EXIT",      "",                                                       "Exit the application"}
 };
 
-// Invalid Numbers Error Message
+// Invalid Numbers Error Message and Incorrect Formatting Error Message
 const std::string INVALID_MSG = "Invalid values entered. Type 'HELP' to see the arguments of the command.";
-// Incorrect Formatting Error Message
 const std::string FORMAT_ERROR_MSG = "Command is incorrectly formatted. Type 'HELP' to see the correct format of the command.";
 
 // Constructor
@@ -44,37 +44,22 @@ CLIHandler::CLIHandler(OrderBook& orderBook)
 {}
 
 // Check if the side is valid
-bool CLIHandler::isValidSide(std::string &side)
-{
-    return (side == "BUY" || side == "SELL");
-}
+bool CLIHandler::isValidSide(std::string side) { return(side == "BUY" || side == "SELL"); }
 
 // Check if the value is a valid double
-bool CLIHandler::isValidDouble(std::string &value)
+bool CLIHandler::isValidDouble(std::string value)
 {
-    try
-    {
-        std::stod(value);
-        return true;
-    }
-    catch (std::exception &e)
-    {
-        return false;
-    }
+  // Try to convert a string into a double variable
+  try { std::stod(value); return true; }
+  catch (...) { return false; }
 }
 
 // Check if the value is a valid integer
-bool CLIHandler::isValidInt(std::string &value)
+bool CLIHandler::isValidInt(std::string value)
 {
-    try
-    {
-        std::stoi(value);
-        return true;
-    }
-    catch (std::exception &e)
-    {
-        return false;
-    }
+  // Try to convert a string into an integer variable
+  try { std::stoi(value); return true; }
+  catch (...) { return false; }
 }
 
 // Make the CLIHandler run
@@ -86,73 +71,31 @@ void CLIHandler::run()
     {
         std::cout << "> ";
         std::getline(std::cin, input);
-
         if (input.empty()) continue;
-
         std::cout << "" << std::endl;
-
         std::vector<std::string> tokens = parseArguments(input);
         std::string command = tokens[0];
 
-        if (command == "HELP")
-        {
-            displayHelp();
-        } 
-        else if (tokens.size() == 4 && command == "LIMIT")
-        {
-            handleLimitOrder(tokens);
-        }
-        else if (tokens.size() == 3 && command == "MARKET")
-        {
-            handleMarketOrder(tokens);
-        }
-        else if (tokens.size() == 4 && command == "STOP")
-        {
-            handleStopOrder(tokens);
-        }
-        else if (tokens.size() == 5 && command == "STOPLIMIT")
-        {
-            handleStopLimitOrder(tokens);
-        }
-        else if (tokens.size() == 5 && command == "ICEBERG")
-        {
-            handleIcebergOrder(tokens);
-        }
-        else if (tokens.size() == 2 && command == "CANCEL")
-        {
-            std::cout << "CANCEL ORDER" << std::endl;
-        }
-        else if (tokens.size() == 1 && command == "BOOK")
-        {
-            std::cout << "BOOK" << std::endl;
-        }
-        else if (tokens.size() >= 1 && tokens.size() <= 2 && command == "DEPTH")
-        {
-            std::cout << "DEPTH" << std::endl;
-        }
-        else if (tokens.size() == 1 && command == "BEST")
-        {
-            std::cout << "BEST" << std::endl;
-        }
-        else if (tokens.size() == 1 && command == "HISTORY")
-        {
-            std::cout << "HISTORY" << std::endl;
-        }
-        else if(command == "EXIT")
-        {
-            break;
-        }
-        else 
-        {
-            std::cout << "Command not recognized. Type 'HELP' to see the list of available commands." << std::endl;
-        }
-
+        if (command == "HELP") { displayHelp(); } 
+        else if (tokens.size() == 4 && command == "LIMIT") { handleLimitOrder(tokens); }
+        else if (tokens.size() == 3 && command == "MARKET") { handleMarketOrder(tokens); }
+        else if (tokens.size() == 4 && command == "STOP") { handleStopOrder(tokens); }
+        else if (tokens.size() == 5 && command == "STOPLIMIT") { handleStopLimitOrder(tokens); }
+        else if (tokens.size() == 5 && command == "ICEBERG") { handleIcebergOrder(tokens); }
+        else if (tokens.size() == 2 && command == "CANCEL") { std::cout << "CANCEL ORDER" << std::endl; }
+        else if (tokens.size() == 1 && command == "BOOK") { m_orderBook.getBookSnapshot(); }
+        else if (tokens.size() >= 1 && tokens.size() <= 2 && command == "DEPTH") { std::cout << "DEPTH" << std::endl; }
+        else if (tokens.size() == 1 && command == "SPREAD") { handleMarketSpread(); }
+        else if (tokens.size() == 1 && command == "BEST") { handleBest(); }
+        else if (tokens.size() == 1 && command == "HISTORY") { std::cout << "HISTORY" << std::endl; }
+        else if(command == "EXIT") { break; }
+        else { std::cout << "Command not recognized. Type 'HELP' to see the list of available commands." << std::endl; }
         std::cout << "\n";
     }
 }
 
 // Handle Limit Orders
-void CLIHandler::handleLimitOrder(std::vector<std::string> &tokens)
+void CLIHandler::handleLimitOrder(std::vector<std::string> tokens)
 {
   // Validation
   if (!isValidSide(tokens[1]) || !isValidInt(tokens[2]) || !isValidDouble(tokens[3]))
@@ -174,12 +117,12 @@ void CLIHandler::handleLimitOrder(std::vector<std::string> &tokens)
   }
 
   // Create LimitOrder
-  LimitOrder limitOrder(m_orderBook, qty, isBuy, price);
-  limitOrder.execute();
+  auto limitOrder = std::make_shared<LimitOrder>(m_orderBook, qty, isBuy, price);
+  limitOrder->execute();
 }
 
 // Handle Market Orders
-void CLIHandler::handleMarketOrder(std::vector<std::string> &tokens)
+void CLIHandler::handleMarketOrder(std::vector<std::string> tokens)
 {
   // Validation
   if (!isValidSide(tokens[1]) || !isValidInt(tokens[2]))
@@ -205,7 +148,7 @@ void CLIHandler::handleMarketOrder(std::vector<std::string> &tokens)
 }
 
 // Handle Stop Orders
-void CLIHandler::handleStopOrder(std::vector<std::string> &tokens)
+void CLIHandler::handleStopOrder(std::vector<std::string> tokens)
 {
   // Validation
   if (!isValidSide(tokens[1]) || !isValidInt(tokens[2]) || !isValidDouble(tokens[3]))
@@ -232,7 +175,7 @@ void CLIHandler::handleStopOrder(std::vector<std::string> &tokens)
 }
 
 // Handle Stop Limit Orders
-void CLIHandler::handleStopLimitOrder(std::vector<std::string> &tokens) 
+void CLIHandler::handleStopLimitOrder(std::vector<std::string> tokens) 
 {
   // Validation
   if (!isValidSide(tokens[1]) || !isValidInt(tokens[2]) || !isValidDouble(tokens[3]) || !isValidDouble(tokens[4]))
@@ -260,7 +203,7 @@ void CLIHandler::handleStopLimitOrder(std::vector<std::string> &tokens)
 }
 
 // Handle Iceberg Limit Orders
-void CLIHandler::handleIcebergOrder(std::vector<std::string> &tokens) 
+void CLIHandler::handleIcebergOrder(std::vector<std::string> tokens) 
 {
   // Input Validation
   if (!isValidSide(tokens[1]) || !isValidInt(tokens[2]) || !isValidInt(tokens[3]) || !isValidDouble(tokens[4]))
@@ -328,8 +271,28 @@ void CLIHandler::displayHelp()
     std::cout << "\n";
 }
 
+// Display the market spread
+void CLIHandler::handleMarketSpread()
+{
+  double marketSpread = m_orderBook.getMarketSpread();
+  if (marketSpread == -1)
+  {
+    std::cout << "No liquidity in the market. Unable to calculate market spread" << std::endl;
+  }
+  else 
+  {
+    std::cout << "Market Spread = " << marketSpread << std::endl;
+  }
+}
+
+// Display best ask and best bid
+void CLIHandler::handleBest()
+{
+  std::cout << "Best\n";
+}
+
 // Parse the arguments of the command to strip the whitespace
-std::vector<std::string> CLIHandler::parseArguments(std::string &command) 
+std::vector<std::string> CLIHandler::parseArguments(std::string command) 
 {
     // Vector containing the command split by whitespace
     std::vector<std::string> parsedTokens;
