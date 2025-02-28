@@ -29,6 +29,7 @@ class OrderBook
     size_t getBidSize();
     Order getBestBid();
     Order getBestAsk();
+    std::shared_ptr<Order> getOrderById(int orderId);
     double getMarketSpread();
     void cancelOrder();
     void getBookSnapshot();

@@ -54,3 +54,8 @@ int Order::getQty()
   int qty = m_qty;
   return qty;
 }
+
+double Order::getLimitPrice()
+{
+  return 0;
+}

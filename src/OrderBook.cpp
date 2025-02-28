@@ -77,12 +77,23 @@ Order OrderBook::getBestBid()
 Order OrderBook::getBestAsk()
 {}
 
+// Method that views an order by id
+std::shared_ptr<Order> OrderBook::getOrderById(int orderId)
+{
+  // Check if orderId exists in orderIndex
+  if (orderIndex.find(orderId) == orderIndex.end())
+  {
+    return nullptr;
+  }
+  return orderIndex[orderId];
+}
+
 // Method that gets the current market spread
 double OrderBook::getMarketSpread()
 {
   // Check there exists at least one ask and at least one bid
   double spread = 0;
-  if (bids.size() > 0 && asks.size() > 0)
+  if (bids.size() == 0 || asks.size() == 0)
   {
     spread = -1;
   }
@@ -92,6 +103,7 @@ double OrderBook::getMarketSpread()
     double lowestBid = asks.begin()->first;
     spread = lowestAsk - lowestBid;
   }
+
   return spread;
 }
 
@@ -130,6 +142,8 @@ void OrderBook::getBookSnapshot()
   // Define column widths
   const int priceWidth = 10;
   const int qtyWidth = 8;
+
+  std::cout << "This is the current state of the book:\n\n";
 
   // Print header
   std::cout << std::setw(priceWidth) << "Asks"
@@ -185,5 +199,3 @@ void OrderBook::getBookSnapshot()
   std::cout << "------------------------------------------\n";
 
 }
-
-

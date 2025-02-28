@@ -19,4 +19,5 @@ class Order
     bool isBuy();
     int getOrderId();
     int getQty();
+    virtual double getLimitPrice();
 };
