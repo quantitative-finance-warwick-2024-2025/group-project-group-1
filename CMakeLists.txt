@@ -16,6 +16,20 @@ set(SRC_FILES ${CMAKE_SOURCE_DIR}/src/CLIHandler.cpp ${CMAKE_SOURCE_DIR}/src/Ord
 add_executable(my_program ${SRC_FILES} ${CMAKE_SOURCE_DIR}/src/main.cpp)
 
 ####################### TESTING STUFF STARTS HERE ###########################################################
+# Create the library for reuse in tests
+add_library(orderbook_lib STATIC ${SRC_FILES})
 
 enable_testing()
-add_subdirectory(tests)
+# add_subdirectory(tests)
+# Add test executable
+add_executable(test_iceberg_order ${CMAKE_SOURCE_DIR}/tests/TestIcebergOrder.cpp)
+
+# Link dependencies
+target_link_libraries(test_iceberg_order PRIVATE orderbook_lib)
+
+# Include headers
+target_include_directories(test_iceberg_order PRIVATE ${CMAKE_SOURCE_DIR}/src)
+
+# Register the test
+add_test(NAME test_iceberg_order COMMAND test_iceberg_order)
+    
