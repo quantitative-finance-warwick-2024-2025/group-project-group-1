@@ -7,8 +7,8 @@
 // Constructor
 Order::Order(OrderBook& orderBook, int qty, bool isBuy)
   :
-  m_orderBook(orderBook),
   m_submitTime(std::time(0)),
+  m_orderBook(orderBook),
   m_orderId(orderBook.generateOrderId()),
   m_qty(qty),
   m_isBuy(isBuy)
@@ -33,4 +33,24 @@ std::string Order::getSubmitTime()
   }
 
   return submitTime;
+}
+
+// Get isBuy
+bool Order::isBuy()
+{
+  bool isBuy = m_isBuy;
+  return isBuy;
+}
+
+// Get order id
+int Order::getOrderId()
+{
+  int orderId = m_orderId;
+  return orderId;
+}
+
+int Order::getQty()
+{
+  int qty = m_qty;
+  return qty;
 }
