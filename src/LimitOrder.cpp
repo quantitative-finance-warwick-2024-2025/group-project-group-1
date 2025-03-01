@@ -13,5 +13,7 @@ LimitOrder::LimitOrder(OrderBook& orderBook, int qty, bool isBuy, double limitPr
 // Method to execute limit order
 void LimitOrder::execute()
 {
-  std::cout << "(OrderID: " << m_orderId << ") " << getSubmitTime() << " - Limit order " << (m_isBuy ? "to buy" : "to sell") << " " << m_qty << " with limit price " << m_limitPrice << std::endl;
+  std::cout << "(OrderID: " << m_orderId << ") " 
+  << getSubmitTime() << " - Limit order " << (m_isBuy ? "to buy" : "to sell") 
+  << " " << m_qty << " with limit price " << m_limitPrice << std::endl;
 }

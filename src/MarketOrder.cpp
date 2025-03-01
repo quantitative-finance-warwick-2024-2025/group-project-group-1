@@ -12,5 +12,7 @@ MarketOrder::MarketOrder(OrderBook& orderBook, int qty, bool isBuy)
 // Execute Method of MarketOrder
 void MarketOrder::execute()
 {
-  std::cout << "(OrderID: " << m_orderId << ") " << getSubmitTime() << " - Market Order to " << (m_isBuy ? "to buy" : "to sell") << " " << m_qty << " shares." << std::endl;
+  std::cout << "(OrderID: " << m_orderId << ") " << getSubmitTime() 
+  << " - Market Order to " << (m_isBuy ? "to buy" : "to sell") 
+  << " " << m_qty << " shares." << std::endl;
 }
