@@ -11,6 +11,10 @@ class StopLimitOrder : public Order
 
   public:
     StopLimitOrder(OrderBook& orderBook, int qty, bool isBuy, double stopPrice, double limitPrice);
-    bool checkTrigger();
-    void execute();
+    bool checkTrigger(double marketPrice);
+    void execute() override;
+    // getters
+    double getStopPrice() const { return m_stopPrice; }
+    double getLimitPrice() const { return m_limitPrice; }
+    bool isTriggered() const { return m_triggered; }
 };
