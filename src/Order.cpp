@@ -1,61 +1,36 @@
 #include "Order.hpp"
-#include "OrderBook.hpp"
-#include <string>
+#include "Types.hpp"
 #include <iostream>
-#include <ctime>
 
-// Constructor
-Order::Order(OrderBook& orderBook, int qty, bool isBuy)
-  :
-  m_submitTime(std::time(0)),
-  m_orderBook(orderBook),
-  m_orderId(orderBook.generateOrderId()),
-  m_qty(qty),
-  m_isBuy(isBuy)
-{}
+// General Constructor
+Order::Order(OrderType orderType, Side side, OrderId orderId, Price price, Price stopPrice,
+             Quantity initialQuantity)
+    : orderType_(orderType), side_(side), orderId_(orderId), price_(price), stopPrice_(stopPrice),
+      initialQuantity_(initialQuantity) {}
 
-// Methods
-void Order::execute()
-{
-  std::cout << "Order with qty = " << m_qty << std::endl;
-}
+// Constructor for Market Order
+Order::Order(Side side, OrderId orderId, Quantity initialQuantity)
+    : Order(OrderType::MARKET, side, orderId, Constants::NoPrice, Constants::NoPrice,
+            initialQuantity) {}
 
-// Get Submit Time
-std::string Order::getSubmitTime()
-{
-  // Convert time_t to string
-  std::string submitTime = std::ctime(&m_submitTime);
+// Constructor for Limit Order
+Order::Order(Side side, OrderId orderId, Price price, Quantity initialQuantity)
+    : Order(OrderType::LIMIT, side, orderId, price, Constants::NoPrice, initialQuantity) {}
 
-  // Remove the \n character from the end if it exists
-  if (!submitTime.empty() && submitTime.back() == '\n')
-  {
-    submitTime.pop_back();
-  }
+OrderType Order::getOrderType() { return orderType_; }
+OrderId Order::getOrderId() { return orderId_; }
+Side Order::getSide() { return side_; }
+Price Order::getPrice() { return price_; }
+Quantity Order::getInitialQuantity() { return initialQuantity_; }
+Quantity Order::getRemainingQuantity() { return initialQuantity_ - filledQuantity_; }
+Quantity Order::getFilledQuantity() { return filledQuantity_; }
 
-  return submitTime;
-}
+void Order::fill(Quantity quantity) {
+    if (quantity > getRemainingQuantity())
+        throw std::logic_error(std::format(
+            "Order ({}) cannot be filled. Remaining quantity is less than requested quantity.",
+            orderId_));
 
-// Get isBuy
-bool Order::isBuy()
-{
-  bool isBuy = m_isBuy;
-  return isBuy;
-}
-
-// Get order id
-int Order::getOrderId()
-{
-  int orderId = m_orderId;
-  return orderId;
-}
-
-int Order::getQty()
-{
-  int qty = m_qty;
-  return qty;
-}
-
-double Order::getLimitPrice()
-{
-  return 0;
+    // Fill order
+    filledQuantity_ += quantity;
 }
