@@ -22,11 +22,15 @@ class Order {
     // Constructor for Limit Order
     Order(Side side, OrderId orderId, Price price, Quantity initialQuantity);
 
+    // constructor for Stop Market/limit orders
+    Order(Side side, OrderId orderId, Price stopPrice, Price limitPrice, 
+          Quantity initialQuantity, OrderType orderType);
+
     OrderType getOrderType();
     Side getSide();
     OrderId getOrderId();
     Price getPrice();
-    Price getStopPrice();
+    Price getStopPrice() const;
     Quantity getInitialQuantity();
     Quantity getRemainingQuantity();
     Quantity getFilledQuantity();

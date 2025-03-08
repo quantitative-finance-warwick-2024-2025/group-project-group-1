@@ -3,6 +3,7 @@
 #include "Types.hpp"
 #include <iomanip>
 #include <iostream>
+#include <format>
 
 // Method that adds an order to the order book
 void OrderBook::addOrder(Order order) {
