@@ -44,7 +44,7 @@ void OrderBook::submitOrder(Order order) {
 
     // Order IDs must be unique
     if (orders_.contains(orderId)) {
-        throw std::logic_error(std::format("Order ({}) already exists. Duplication occurred.", orderId));
+        throw std::logic_error("Order (" + std::to_string(orderId) + ") already exists. Duplication occurred.");
     }
 
     // If its a market order, handle execution
@@ -217,7 +217,7 @@ void OrderBook::removeOrder(OrderId orderId, bool print) {
     }
 
     if (print) {
-        std::cout << GREEN << std::format("[System] Removed Order ({}) from the book.", orderId) << RESET << std::endl;
+        std::cout << GREEN << "[System] Removed order (" << orderId << ") from the book." << RESET << std::endl;
     }
 }
 
@@ -460,7 +460,7 @@ void OrderBook::removeStopOrder(OrderPointer orderPointer, bool print) {
     }
 
     if (print) {
-        std::cout << RED << std::format("[System] Removed Stop Order ({}) from the book.", orderId) << RESET << std::endl;
+        std::cout << RED << "[System] Removed stop order (" << orderId << ") from the book." << RESET << std::endl;
     }
 }
 
