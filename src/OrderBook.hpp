@@ -11,10 +11,8 @@ class OrderBook {
 
   public:
     void submitOrder(Order order);
-    void addOrder(Order order);
     OrderPointer viewOrder(OrderId orderId);
     void removeOrder(OrderId orderId);
-    void executeOrder(Order order);
     void printAsks();
     void printBids();
     void printOrders();

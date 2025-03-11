@@ -192,50 +192,6 @@ void OrderBook::removeOrder(OrderId orderId) {
     std::cout << std::format("   > Removed Order ({}) from the book.", orderId) << std::endl;
 }
 
-// Method to execute a marker order
-void OrderBook::executeOrder(Order order) {
-    // Check that this is a market order
-    if (order.getOrderType() != OrderType::MARKET) {
-        throw std::logic_error(
-            std::format("Order ({}) is not a market order.", order.getOrderId()));
-    }
-
-    Side side = order.getSide();
-    Quantity remainingQuantity = order.getRemainingQuantity();
-    OrderPointers ordersFilled{};
-
-    std::cout << "Market Execution Submitted" << std::endl;
-    std::cout << "   > Filling " << (side == Side::BUY ? "buy" : "sell") << "  market order for "
-              << remainingQuantity << std::endl;
-
-    if (side == Side::BUY) {
-        // Check ask side
-        if (asks_.size() == 0) {
-            std::cout << "   > No possible trades found." << std::endl;
-            return;
-        }
-        fillMarketOrder(asks_, remainingQuantity, ordersFilled);
-    } else {
-        // Check bid size
-        if (bids_.size() == 0) {
-            std::cout << "   > No possible trades found." << std::endl;
-            return;
-        }
-        fillMarketOrder(bids_, remainingQuantity, ordersFilled);
-    }
-
-    for (OrderPointer currentOrderPointer : ordersFilled) {
-        removeOrder(currentOrderPointer->getOrderId());
-    }
-
-    if (remainingQuantity == 0) {
-        std::cout << "   > Fully executed market order." << std::endl;
-    } else {
-        std::cout << "   > Partially executed market order. Remaining quantity "
-                  << remainingQuantity << std::endl;
-    }
-}
-
 void OrderBook::getBookSnapshot() {
     // Define column widths
     std::cout << "" << std::endl;
