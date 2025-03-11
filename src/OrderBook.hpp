@@ -10,6 +10,7 @@ class OrderBook {
     OrderId currentOrderId_{0};
 
   public:
+    void submitOrder(Order order);
     void addOrder(Order order);
     OrderPointer viewOrder(OrderId orderId);
     void removeOrder(OrderId orderId);

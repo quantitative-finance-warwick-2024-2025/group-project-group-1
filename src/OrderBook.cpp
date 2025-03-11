@@ -4,15 +4,62 @@
 #include <iomanip>
 #include <iostream>
 
-// Method that adds an order to the order book
-void OrderBook::addOrder(Order order) {
-    Side side = order.getSide();
-    OrderType orderType = order.getOrderType();
-    Price limitPrice = order.getPrice();
-    OrderPointer orderPointer = std::make_shared<Order>(order);
-    OrderId orderId = order.getOrderId();
+// Template method that handles filling a market order
+template <typename Compare>
+void fillMarketOrder(std::map<Price, OrderPointers, Compare> &book, Quantity &remainingQuantity,
+                     OrderPointers &ordersFilled) {
+    for (const auto &[price, ordersList] : book) {
+        if (remainingQuantity == 0)
+            break;
 
-    // Add limit orders to the book
+        for (auto &orderPointer : ordersList) {
+            if (remainingQuantity == 0)
+                break;
+            Quantity available = orderPointer->getRemainingQuantity();
+            if (available > remainingQuantity) {
+                orderPointer->fill(remainingQuantity);
+                remainingQuantity = 0;
+            } else {
+                ordersFilled.push_back(orderPointer);
+                remainingQuantity -= available;
+                orderPointer->fill(available);
+            }
+        }
+    }
+}
+
+// Method that handles submission of orders to the orderbook
+void OrderBook::submitOrder(Order order) {
+    // Get order details
+    OrderType orderType = order.getOrderType();
+    Side orderSide = order.getSide();
+    Quantity remainingQuantity = order.getRemainingQuantity();
+    OrderPointers ordersFilled{};
+    OrderId orderId = order.getOrderId();
+    OrderPointer orderPointer = std::make_shared<Order>(order);
+    Price limitPrice = order.getPrice();
+
+    // If its a market order, handle execution
+    if (orderType == OrderType::MARKET) {
+        if (orderSide == Side::BUY) {
+            fillMarketOrder(asks_, remainingQuantity, ordersFilled);
+        } else {
+            fillMarketOrder(bids_, remainingQuantity, ordersFilled);
+        }
+
+        for (OrderPointer currentOrderPointer : ordersFilled) {
+            removeOrder(currentOrderPointer->getOrderId());
+        }
+
+        if (remainingQuantity == 0) {
+            std::cout << "   > Fully executed market order." << std::endl;
+        } else {
+            std::cout << "   > Partially executed market order. Remaining quantity: "
+                      << remainingQuantity << std::endl;
+        }
+    }
+
+    // If its a limit order, handle adding to the book
     if (orderType == OrderType::LIMIT) {
         // Add the order to the orders
         if (orders_.contains(orderId)) {
@@ -21,20 +68,20 @@ void OrderBook::addOrder(Order order) {
         }
         orders_[orderId] = orderPointer;
         // Add the order to the book
-        if (side == Side::BUY) {
+        if (orderSide == Side::BUY) {
             // Add order to asks
             bids_[limitPrice].push_back(orderPointer);
         } else {
             // Add orders to bids
             asks_[limitPrice].push_back(orderPointer);
         }
+
+        std::cout << "   > Added Limit (" << (orderPointer->getSide() == Side::BUY ? "buy" : "sell")
+                  << ") order (" << orderId << ") for " << orderPointer->getRemainingQuantity()
+                  << " @ " << orderPointer->getPrice() << std::endl;
+
+        matchOrders();
     }
-
-    std::cout << "   > Added Limit (" << (orderPointer->getSide() == Side::BUY ? "buy" : "sell")
-              << ") order (" << orderId << ") for " << orderPointer->getRemainingQuantity() << " @ "
-              << orderPointer->getPrice() << std::endl;
-
-    matchOrders();
 }
 
 // Method that prints the orders of the order book
@@ -143,29 +190,6 @@ void OrderBook::removeOrder(OrderId orderId) {
     }
 
     std::cout << std::format("   > Removed Order ({}) from the book.", orderId) << std::endl;
-}
-
-template <typename Compare>
-void fillMarketOrder(std::map<Price, OrderPointers, Compare> &book, Quantity &remainingQuantity,
-                     OrderPointers &ordersFilled) {
-    for (const auto &[price, ordersList] : book) {
-        if (remainingQuantity == 0)
-            break;
-
-        for (auto &orderPointer : ordersList) {
-            if (remainingQuantity == 0)
-                break;
-            Quantity available = orderPointer->getRemainingQuantity();
-            if (available > remainingQuantity) {
-                orderPointer->fill(remainingQuantity);
-                remainingQuantity = 0;
-            } else {
-                ordersFilled.push_back(orderPointer);
-                remainingQuantity -= available;
-                orderPointer->fill(available);
-            }
-        }
-    }
 }
 
 // Method to execute a marker order
