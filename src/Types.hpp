@@ -2,6 +2,10 @@
 #include <limits>
 #include <list>
 #include <map>
+#include <memory>
+#include <string>
+#include <unordered_map>
+#include <vector>
 #define RESET "\033[0m"
 #define RED "\033[31m"     /* Red */
 #define GREEN "\033[32m"   /* Green */
@@ -25,7 +29,6 @@ using Commands = std::vector<CommandInfo>;
 using Price = double;
 using Quantity = int;
 using OrderId = int;
-using Time = std::time_t;
 using IsTriggered = bool;
 
 // Pointers - Shared Pointers
