@@ -133,8 +133,7 @@ void CLIHandler::handleLimitOrder(std::vector<std::string> tokens) {
         return;
     }
 
-    Order order(side, orderBook_.nextOrderId(), price, qty);
-    orderBook_.submitOrder(order);
+    orderBook_.submitOrder(Order::CreateLimitOrder(side, orderBook_.nextOrderId(), price, qty));
 }
 
 // Handle Market Orders
@@ -157,8 +156,7 @@ void CLIHandler::handleMarketOrder(std::vector<std::string> tokens) {
     }
 
     // Create the MarketOrder
-    Order order(side, orderBook_.nextOrderId(), qty);
-    orderBook_.submitOrder(order);
+    orderBook_.submitOrder(Order::CreateMarketOrder(side, orderBook_.nextOrderId(), qty));
 }
 
 // // Handle Stop Orders

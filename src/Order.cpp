@@ -9,13 +9,15 @@ Order::Order(OrderType orderType, Side side, OrderId orderId, Price price, Price
       initialQuantity_(initialQuantity) {}
 
 // Constructor for Market Order
-Order::Order(Side side, OrderId orderId, Quantity initialQuantity)
-    : Order(OrderType::MARKET, side, orderId, Constants::NoPrice, Constants::NoPrice,
-            initialQuantity) {}
+Order Order::CreateMarketOrder(Side side, OrderId orderId, Quantity initialQuantity) {
+    return Order(OrderType::MARKET, side, orderId, Constants::NoPrice, Constants::NoPrice,
+                 initialQuantity);
+}
 
 // Constructor for Limit Order
-Order::Order(Side side, OrderId orderId, Price price, Quantity initialQuantity)
-    : Order(OrderType::LIMIT, side, orderId, price, Constants::NoPrice, initialQuantity) {}
+Order Order::CreateLimitOrder(Side side, OrderId orderId, Price price, Quantity initialQuantity) {
+    return Order(OrderType::LIMIT, side, orderId, price, Constants::NoPrice, initialQuantity);
+}
 
 OrderType Order::getOrderType() { return orderType_; }
 OrderId Order::getOrderId() { return orderId_; }
