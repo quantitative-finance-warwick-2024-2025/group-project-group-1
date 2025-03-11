@@ -46,7 +46,8 @@ Quantity Order::getFilledQuantity() const { return filledQuantity_; }
 // Method that changes
 void Order::fill(Quantity quantity) {
     if (quantity > getRemainingQuantity())
-        throw std::logic_error(std::format("Order ({}) cannot be filled. Remaining quantity is less than requested quantity.", orderId_));
+        throw std::logic_error("Order (" + std::to_string(orderId_) +
+                               ") cannot be filled. Remaining quantity is less than requested quantity.");
 
     // Fill order
     filledQuantity_ += quantity;
