@@ -24,13 +24,14 @@ class OrderBook {
     void matchOrders();
     void checkStopOrders();
     OrderId nextOrderId();
-    OrderPointer viewOrder(OrderId orderId);
-    OrderPointer getBestBidOrder() const;
-    OrderPointer getBestAskOrder() const;
-    Quantity getAskQuantityAtLevel(Price price);
-    Quantity getBidQuantityAtLevel(Price price);
-    Price getMarketSpread() const;
-    Price getMarketPrice() const;
     void clear();
     void removeStopOrder(OrderPointer stopOrderPointer, bool print = false);
+    // Getter methods
+    Quantity getBidQuantityAtLevel(Price price);
+    Quantity getAskQuantityAtLevel(Price price);
+    OrderPointer getBestAskOrder() const;
+    OrderPointer getBestBidOrder() const;
+    OrderPointer getOrder(OrderId orderId);
+    Price getMarketSpread() const;
+    Price getMarketPrice() const;
 };

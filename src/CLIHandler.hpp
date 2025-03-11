@@ -10,19 +10,24 @@ class CLIHandler {
   public:
     // Constructor
     CLIHandler(OrderBook &orderBook);
-    bool isValidSide(std::string side);
-    bool isValidDouble(std::string value);
-    bool isValidInt(std::string value);
-    void displayHelp();
-    std::vector<std::string> parseArguments(std::string command);
-    void handleLimitOrder(std::vector<std::string> tokens);
-    void handleMarketOrder(std::vector<std::string> tokens);
-    void handleStopOrder(std::vector<std::string> tokens);
-    void handleStopLimitOrder(std::vector<std::string> tokens);
-    void handleIcebergOrder(std::vector<std::string> tokens);
-    void handleViewOrder(std::vector<std::string> tokens);
-    void handleMarketSpread();
-    void handleBest();
-    void handleCancel(std::vector<std::string> tokens);
+
+    // Validators
+    bool isValidSide(Token side);
+    bool isValidDouble(Token value);
+    bool isValidInt(Token value);
+
+    // Operational Methods
     void run();
+    Tokens parseArguments(Command command);
+
+    // Handler Methods
+    void handleLimitOrder(Tokens tokens);
+    void handleMarketOrder(Tokens tokens);
+    void handleStopOrder(Tokens tokens);
+    void handleStopLimitOrder(Tokens tokens);
+    void handleViewOrder(Tokens tokens);
+    void handleBest();
+    void handleCancel(Tokens tokens);
+    void handleMarketSpread();
+    void handleHelp();
 };

@@ -77,5 +77,5 @@ TEST_CASE("MarketOrder - Execution Tests", "[tests]") {
     OrderId limOrderId = orderBook.nextOrderId();
     orderBook.submitOrder(Order::CreateLimitOrder(Side::SELL, limOrderId, 1.75, 100));
     orderBook.submitOrder(Order::CreateMarketOrder(Side::BUY, orderBook.nextOrderId(), 100));
-    REQUIRE(orderBook.viewOrder(limOrderId) == nullptr);
+    REQUIRE(orderBook.getOrder(limOrderId) == nullptr);
 }

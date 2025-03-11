@@ -1,21 +1,3 @@
-#define RESET "\033[0m"
-#define BLACK "\033[30m"              /* Black */
-#define RED "\033[31m"                /* Red */
-#define GREEN "\033[32m"              /* Green */
-#define YELLOW "\033[33m"             /* Yellow */
-#define BLUE "\033[34m"               /* Blue */
-#define MAGENTA "\033[35m"            /* Magenta */
-#define CYAN "\033[36m"               /* Cyan */
-#define WHITE "\033[37m"              /* White */
-#define BOLDBLACK "\033[1m\033[30m"   /* Bold Black */
-#define BOLDRED "\033[1m\033[31m"     /* Bold Red */
-#define BOLDGREEN "\033[1m\033[32m"   /* Bold Green */
-#define BOLDYELLOW "\033[1m\033[33m"  /* Bold Yellow */
-#define BOLDBLUE "\033[1m\033[34m"    /* Bold Blue */
-#define BOLDMAGENTA "\033[1m\033[35m" /* Bold Magenta */
-#define BOLDCYAN "\033[1m\033[36m"    /* Bold Cyan */
-#define BOLDWHITE "\033[1m\033[37m"   /* Bold White */
-
 #include "OrderBook.hpp"
 #include "Order.hpp"
 #include "Types.hpp"
@@ -44,6 +26,10 @@ void fillMarketOrder(std::map<Price, OrderPointers, Compare> &book, Quantity &re
         }
     }
 }
+
+///////////////////////////////////////////////////////////////
+// Methods
+///////////////////////////////////////////////////////////////
 
 // Method that handles submission of orders to the orderbook
 void OrderBook::submitOrder(Order order) {
@@ -190,18 +176,6 @@ void OrderBook::printBids() {
     }
 }
 
-// Method that gets the order from the book
-OrderPointer OrderBook::viewOrder(OrderId orderId) {
-    // Check if order exists
-    if (!orders_.contains(orderId)) {
-        return nullptr;
-    }
-
-    // Return order
-    OrderPointer orderPointer = orders_.at(orderId);
-    return orderPointer;
-}
-
 // Method that removes order from the book
 void OrderBook::removeOrder(OrderId orderId, bool print) {
     // Check if order exists
@@ -213,7 +187,7 @@ void OrderBook::removeOrder(OrderId orderId, bool print) {
     }
 
     // Get the order
-    OrderPointer orderPointer = viewOrder(orderId);
+    OrderPointer orderPointer = getOrder(orderId);
 
     // Get orderType
     OrderType orderType = orderPointer->getOrderType();
@@ -247,6 +221,7 @@ void OrderBook::removeOrder(OrderId orderId, bool print) {
     }
 }
 
+// Method that gets the current book snapshot
 void OrderBook::getBookSnapshot() {
     // Define column widths
     std::cout << "" << std::endl;
@@ -436,85 +411,6 @@ void OrderBook::checkStopOrders() {
     }
 }
 
-// Method that returns the best ask order
-OrderPointer OrderBook::getBestAskOrder() const {
-    if (asks_.empty()) {
-        return nullptr;
-    }
-    OrderPointer bestAskOrderPtr = asks_.begin()->second.front();
-    return bestAskOrderPtr;
-}
-
-// Method that returns the best bid order
-OrderPointer OrderBook::getBestBidOrder() const {
-    if (bids_.empty()) {
-        return nullptr;
-    }
-    OrderPointer bestBidOrderPtr = bids_.begin()->second.front();
-    return bestBidOrderPtr;
-}
-
-// Methods that returns the market spread
-Price OrderBook::getMarketSpread() const {
-    // Get best bid and ask
-    OrderPointer bestAskOrderPtr = getBestAskOrder();
-    OrderPointer bestBidOrderPtr = getBestBidOrder();
-    // Check if we have nullptr
-    if (bestAskOrderPtr == nullptr || bestBidOrderPtr == nullptr) {
-        return Constants::NoPrice;
-    }
-    Price marketSpread = bestAskOrderPtr->getPrice() - bestBidOrderPtr->getPrice();
-    return marketSpread;
-}
-
-// Method that returns the market price
-Price OrderBook::getMarketPrice() const {
-    OrderPointer bestAsk = getBestAskOrder();
-    OrderPointer bestBid = getBestBidOrder();
-
-    // Return the midpoint of best bid and best ask if both are available, otherwise return best bid or best ask
-    if (bestAsk != nullptr && bestBid != nullptr) {
-        return (bestAsk->getPrice() + bestBid->getPrice()) / 2.0;
-    } else if (bestAsk != nullptr) {
-        return bestAsk->getPrice();
-    } else if (bestBid != nullptr) {
-        return bestBid->getPrice();
-    }
-
-    return Constants::NoPrice; // No valid price available - no liquidity in the market
-}
-
-// Method that gets the available asks quantity at a level
-Quantity OrderBook::getAskQuantityAtLevel(Price priceLevel) {
-    // Check if any orders exist
-    Asks::iterator asksIterator = asks_.find(priceLevel);
-    if (asksIterator == asks_.end())
-        return 0;
-
-    // Sum the remaining quantity
-    Quantity availableQuantity{0};
-    for (OrderPointer orderPointer : asksIterator->second) {
-        availableQuantity += orderPointer->getRemainingQuantity();
-    }
-
-    return availableQuantity;
-}
-
-// Method that gets the available bids quantity at a level
-Quantity OrderBook::getBidQuantityAtLevel(Price priceLevel) {
-    // Check if any orders exist
-    Bids::iterator bidsIterator = bids_.find(priceLevel);
-    if (bidsIterator == bids_.end())
-        return 0;
-
-    Quantity availableQuantity{0};
-    for (OrderPointer orderPointer : bidsIterator->second) {
-        availableQuantity += orderPointer->getRemainingQuantity();
-    }
-
-    return availableQuantity;
-}
-
 // Method to reset the orderbook
 void OrderBook::clear() {
     bids_.clear();
@@ -523,6 +419,7 @@ void OrderBook::clear() {
     currentOrderId_ = 0;
 }
 
+// Remove stop order from the orderbook
 void OrderBook::removeStopOrder(OrderPointer orderPointer, bool print) {
     // Check if the order exists in the main orders map.
     OrderId orderId = orderPointer->getOrderId();
@@ -565,4 +462,99 @@ void OrderBook::removeStopOrder(OrderPointer orderPointer, bool print) {
     if (print) {
         std::cout << RED << std::format("[System] Removed Stop Order ({}) from the book.", orderId) << RESET << std::endl;
     }
+}
+
+///////////////////////////////////////////////////////////////
+// Getter Methods
+///////////////////////////////////////////////////////////////
+
+// Method that gets the available bids quantity at a level
+Quantity OrderBook::getBidQuantityAtLevel(Price priceLevel) {
+    // Check if any orders exist
+    Bids::iterator bidsIterator = bids_.find(priceLevel);
+    if (bidsIterator == bids_.end())
+        return 0;
+
+    Quantity availableQuantity{0};
+    for (OrderPointer orderPointer : bidsIterator->second) {
+        availableQuantity += orderPointer->getRemainingQuantity();
+    }
+
+    return availableQuantity;
+}
+
+// Method that gets the available asks quantity at a level
+Quantity OrderBook::getAskQuantityAtLevel(Price priceLevel) {
+    // Check if any orders exist
+    Asks::iterator asksIterator = asks_.find(priceLevel);
+    if (asksIterator == asks_.end())
+        return 0;
+
+    // Sum the remaining quantity
+    Quantity availableQuantity{0};
+    for (OrderPointer orderPointer : asksIterator->second) {
+        availableQuantity += orderPointer->getRemainingQuantity();
+    }
+
+    return availableQuantity;
+}
+
+// Method that returns the best ask order
+OrderPointer OrderBook::getBestAskOrder() const {
+    if (asks_.empty()) {
+        return nullptr;
+    }
+    OrderPointer bestAskOrderPtr = asks_.begin()->second.front();
+    return bestAskOrderPtr;
+}
+
+// Method that returns the best bid order
+OrderPointer OrderBook::getBestBidOrder() const {
+    if (bids_.empty()) {
+        return nullptr;
+    }
+    OrderPointer bestBidOrderPtr = bids_.begin()->second.front();
+    return bestBidOrderPtr;
+}
+
+// Method that gets the order from the book
+OrderPointer OrderBook::getOrder(OrderId orderId) {
+    // Check if order exists
+    if (!orders_.contains(orderId)) {
+        return nullptr;
+    }
+
+    // Return order
+    OrderPointer orderPointer = orders_.at(orderId);
+    return orderPointer;
+}
+
+// Methods that returns the market spread
+Price OrderBook::getMarketSpread() const {
+    // Get best bid and ask
+    OrderPointer bestAskOrderPtr = getBestAskOrder();
+    OrderPointer bestBidOrderPtr = getBestBidOrder();
+    // Check if we have nullptr
+    if (bestAskOrderPtr == nullptr || bestBidOrderPtr == nullptr) {
+        return Constants::NoPrice;
+    }
+    Price marketSpread = bestAskOrderPtr->getPrice() - bestBidOrderPtr->getPrice();
+    return marketSpread;
+}
+
+// Method that returns the market price
+Price OrderBook::getMarketPrice() const {
+    OrderPointer bestAsk = getBestAskOrder();
+    OrderPointer bestBid = getBestBidOrder();
+
+    // Return the midpoint of best bid and best ask if both are available, otherwise return best bid or best ask
+    if (bestAsk != nullptr && bestBid != nullptr) {
+        return (bestAsk->getPrice() + bestBid->getPrice()) / 2.0;
+    } else if (bestAsk != nullptr) {
+        return bestAsk->getPrice();
+    } else if (bestBid != nullptr) {
+        return bestBid->getPrice();
+    }
+
+    return Constants::NoPrice; // No valid price available - no liquidity in the market
 }
