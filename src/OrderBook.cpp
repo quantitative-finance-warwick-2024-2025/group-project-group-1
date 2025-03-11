@@ -6,8 +6,7 @@
 
 // Template method that handles filling a market order
 template <typename Compare>
-void fillMarketOrder(std::map<Price, OrderPointers, Compare> &book, Quantity &remainingQuantity,
-                     OrderPointers &ordersFilled) {
+void fillMarketOrder(std::map<Price, OrderPointers, Compare> &book, Quantity &remainingQuantity, OrderPointers &ordersFilled) {
     for (const auto &[price, ordersList] : book) {
         if (remainingQuantity == 0)
             break;
@@ -39,6 +38,11 @@ void OrderBook::submitOrder(Order order) {
     OrderPointer orderPointer = std::make_shared<Order>(order);
     Price limitPrice = order.getPrice();
 
+    // Order IDs must be unique
+    if (orders_.contains(orderId)) {
+        throw std::logic_error(std::format("Order ({}) already exists. Duplication occurred.", orderId));
+    }
+
     // If its a market order, handle execution
     if (orderType == OrderType::MARKET) {
         if (orderSide == Side::BUY) {
@@ -54,33 +58,51 @@ void OrderBook::submitOrder(Order order) {
         if (remainingQuantity == 0) {
             std::cout << "   > Fully executed market order." << std::endl;
         } else {
-            std::cout << "   > Partially executed market order. Remaining quantity: "
-                      << remainingQuantity << std::endl;
+            std::cout << "   > Partially executed market order. Remaining quantity: " << remainingQuantity << std::endl;
         }
+
+        matchOrders();
+        checkStopOrders();
+
+        return;
     }
 
     // If its a limit order, handle adding to the book
     if (orderType == OrderType::LIMIT) {
         // Add the order to the orders
-        if (orders_.contains(orderId)) {
-            throw std::logic_error(
-                std::format("Order ({}) already exists. Duplication occurred.", orderId));
-        }
         orders_[orderId] = orderPointer;
         // Add the order to the book
         if (orderSide == Side::BUY) {
-            // Add order to asks
+            // Add order to bids
             bids_[limitPrice].push_back(orderPointer);
         } else {
-            // Add orders to bids
+            // Add orders to asks
             asks_[limitPrice].push_back(orderPointer);
         }
 
-        std::cout << "   > Added Limit (" << (orderPointer->getSide() == Side::BUY ? "buy" : "sell")
-                  << ") order (" << orderId << ") for " << orderPointer->getRemainingQuantity()
-                  << " @ " << orderPointer->getPrice() << std::endl;
+        std::cout << "   > Added Limit (" << (orderPointer->getSide() == Side::BUY ? "buy" : "sell") << ") order (" << orderId << ") for "
+                  << orderPointer->getRemainingQuantity() << " @ " << orderPointer->getPrice() << std::endl;
 
         matchOrders();
+        checkStopOrders();
+
+        return;
+    }
+
+    // If its a stop order
+    if (orderType == OrderType::STOP_LIMIT || orderType == OrderType::STOP_MARKET) {
+        // Add the order to the orders
+        orders_[orderId] = orderPointer;
+        if (orderSide == Side::BUY) {
+            stopBids_[order.getStopPrice()].push_back(orderPointer);
+        } else {
+            stopAsks_[order.getStopPrice()].push_back(orderPointer);
+        }
+
+        std::cout << "   > Added Stop Order (" << (orderSide == Side::BUY ? "buy" : "sell") << ") with stop price " << order.getStopPrice()
+                  << " and quantity " << order.getRemainingQuantity() << std::endl;
+
+        checkStopOrders();
     }
 }
 
@@ -92,9 +114,8 @@ void OrderBook::printOrders() {
         for (std::pair<OrderId, OrderPointer> ordersList : orders_) {
             OrderId orderId = ordersList.first;
             OrderPointer orderPointer = ordersList.second;
-            std::cout << "   > Limit (" << (orderPointer->getSide() == Side::BUY ? "buy" : "sell")
-                      << ") order (" << orderId << ") for " << orderPointer->getRemainingQuantity()
-                      << " @ " << orderPointer->getPrice() << std::endl;
+            std::cout << "   > Limit (" << (orderPointer->getSide() == Side::BUY ? "buy" : "sell") << ") order (" << orderId << ") for "
+                      << orderPointer->getRemainingQuantity() << " @ " << orderPointer->getPrice() << std::endl;
         }
     } else {
         std::cout << "   > No orders found." << std::endl;
@@ -111,10 +132,8 @@ void OrderBook::printAsks() {
 
             std::cout << "Ask Level = " << levelPrice << std::endl;
             for (OrderPointer orderPointer : orderPointers) {
-                std::cout << "   > Limit ("
-                          << (orderPointer->getSide() == Side::BUY ? "buy" : "sell") << ") order ("
-                          << orderPointer->getOrderId() << ") for "
-                          << orderPointer->getRemainingQuantity() << " @ "
+                std::cout << "   > Limit (" << (orderPointer->getSide() == Side::BUY ? "buy" : "sell") << ") order ("
+                          << orderPointer->getOrderId() << ") for " << orderPointer->getRemainingQuantity() << " @ "
                           << orderPointer->getPrice() << std::endl;
             }
         }
@@ -133,10 +152,8 @@ void OrderBook::printBids() {
 
             std::cout << "Bids Level = " << levelPrice << std::endl;
             for (OrderPointer orderPointer : orderPointers) {
-                std::cout << "   > Limit ("
-                          << (orderPointer->getSide() == Side::BUY ? "buy" : "sell") << ") order ("
-                          << orderPointer->getOrderId() << ") for "
-                          << orderPointer->getRemainingQuantity() << " @ "
+                std::cout << "   > Limit (" << (orderPointer->getSide() == Side::BUY ? "buy" : "sell") << ") order ("
+                          << orderPointer->getOrderId() << ") for " << orderPointer->getRemainingQuantity() << " @ "
                           << orderPointer->getPrice() << std::endl;
             }
         }
@@ -255,6 +272,7 @@ OrderId OrderBook::nextOrderId() {
     return currentOrderId_;
 }
 
+// Method that matches the limit order book
 void OrderBook::matchOrders() {
     std::cout << "   > Matching algorithm triggered." << std::endl;
 
@@ -283,17 +301,15 @@ void OrderBook::matchOrders() {
             OrderPointer askOrder = askOrdersAtLevel.front();
 
             // Determine the trade quantity as the minimum remaining quantity of the two orders
-            Quantity tradeQty =
-                std::min(bidOrder->getRemainingQuantity(), askOrder->getRemainingQuantity());
+            Quantity tradeQty = std::min(bidOrder->getRemainingQuantity(), askOrder->getRemainingQuantity());
             Price tradePrice = bestAskPrice;
 
             // Fill both orders
             bidOrder->fill(tradeQty);
             askOrder->fill(tradeQty);
 
-            std::cout << "   > Trade executed: " << tradeQty << " @ " << tradePrice
-                      << " between BUY order " << bidOrder->getOrderId() << " and SELL order "
-                      << askOrder->getOrderId() << std::endl;
+            std::cout << "   > Trade executed: " << tradeQty << " @ " << tradePrice << " between BUY order " << bidOrder->getOrderId()
+                      << " and SELL order " << askOrder->getOrderId() << std::endl;
 
             matchedAnything = true;
 
@@ -319,8 +335,72 @@ void OrderBook::matchOrders() {
     }
 }
 
+// Method that checks stop orders
+void OrderBook::checkStopOrders() {
+    // Calculate the current market price from active orders.
+    Price marketPrice = getMarketPrice();
+    if (std::isnan(marketPrice))
+        return; // No valid market price available.
+
+    // Handle stops
+    if (!stopBids_.empty()) {
+        StopBids::iterator bidIt = stopBids_.begin(); // first stop price level
+        Price bidStopPrice = bidIt->first;            // lowest stop price
+
+        // Trigger condition: marketPrice >= stopPrice
+        if (marketPrice >= bidStopPrice) {
+            // Get the first stop order at this price level.
+            OrderPointer orderPtr = bidIt->second.front();
+            Order triggeredOrder;
+
+            if (orderPtr->getOrderType() == OrderType::STOP_MARKET) {
+                triggeredOrder = Order::CreateMarketOrder(orderPtr->getSide(), orderPtr->getOrderId(), orderPtr->getRemainingQuantity());
+            } else { // STOP_LIMIT order
+                triggeredOrder = Order::CreateLimitOrder(orderPtr->getSide(), orderPtr->getOrderId(), orderPtr->getPrice(),
+                                                         orderPtr->getRemainingQuantity());
+            }
+
+            // Remove the stop order
+            removeStopOrder(orderPtr);
+            // Re-submit the converted order
+            submitOrder(triggeredOrder);
+            std::cout << "   > Triggered BUY stop order " << orderPtr->getOrderId() << " at market price " << marketPrice << std::endl;
+            matchOrders();
+            return;
+        }
+    }
+
+    // handle asks
+    if (!stopAsks_.empty()) {
+        auto askIt = stopAsks_.begin();    // first stop price level
+        Price askStopPrice = askIt->first; // highest stop price
+
+        // Trigger condition: marketPrice <= stopPrice
+        if (marketPrice <= askStopPrice) {
+            // Get first stop order at this price level
+            OrderPointer orderPtr = askIt->second.front();
+            Order triggeredOrder;
+
+            if (orderPtr->getOrderType() == OrderType::STOP_MARKET) {
+                triggeredOrder = Order::CreateMarketOrder(orderPtr->getSide(), orderPtr->getOrderId(), orderPtr->getRemainingQuantity());
+            } else { // STOP_LIMIT order
+                triggeredOrder = Order::CreateLimitOrder(orderPtr->getSide(), orderPtr->getOrderId(), orderPtr->getPrice(),
+                                                         orderPtr->getRemainingQuantity());
+            }
+
+            // Remove stop order
+            removeStopOrder(orderPtr);
+            // Re-submit converted order
+            submitOrder(triggeredOrder);
+            std::cout << "Triggered SELL stop order " << orderPtr->getOrderId() << " at market price " << marketPrice << std::endl;
+            matchOrders();
+            return;
+        }
+    }
+}
+
 // Method that returns the best ask order
-OrderPointer OrderBook::getBestAskOrder() {
+OrderPointer OrderBook::getBestAskOrder() const {
     if (asks_.empty()) {
         return nullptr;
     }
@@ -329,7 +409,7 @@ OrderPointer OrderBook::getBestAskOrder() {
 }
 
 // Method that returns the best bid order
-OrderPointer OrderBook::getBestBidOrder() {
+OrderPointer OrderBook::getBestBidOrder() const {
     if (bids_.empty()) {
         return nullptr;
     }
@@ -338,7 +418,7 @@ OrderPointer OrderBook::getBestBidOrder() {
 }
 
 // Methods that returns the market spread
-Price OrderBook::getMarketSpread() {
+Price OrderBook::getMarketSpread() const {
     // Get best bid and ask
     OrderPointer bestAskOrderPtr = getBestAskOrder();
     OrderPointer bestBidOrderPtr = getBestBidOrder();
@@ -348,6 +428,23 @@ Price OrderBook::getMarketSpread() {
     }
     Price marketSpread = bestAskOrderPtr->getPrice() - bestBidOrderPtr->getPrice();
     return marketSpread;
+}
+
+// Method that returns the market price
+Price OrderBook::getMarketPrice() const {
+    OrderPointer bestAsk = getBestAskOrder();
+    OrderPointer bestBid = getBestBidOrder();
+
+    // Return the midpoint of best bid and best ask if both are available, otherwise return best bid or best ask
+    if (bestAsk != nullptr && bestBid != nullptr) {
+        return (bestAsk->getPrice() + bestBid->getPrice()) / 2.0;
+    } else if (bestAsk != nullptr) {
+        return bestAsk->getPrice();
+    } else if (bestBid != nullptr) {
+        return bestBid->getPrice();
+    }
+
+    return Constants::NoPrice; // No valid price available - no liquidity in the market
 }
 
 // Method that gets the available asks quantity at a level
@@ -387,4 +484,44 @@ void OrderBook::clear() {
     asks_.clear();
     orders_.clear();
     currentOrderId_ = 0;
+}
+
+void OrderBook::removeStopOrder(OrderPointer orderPointer) {
+    // Check if the order exists in the main orders map.
+    OrderId orderId = orderPointer->getOrderId();
+    if (!orders_.contains(orderId)) {
+        std::cout << "   > Order ID doesn't exist.\n";
+        return;
+    }
+
+    // Remove the order from the main orders map.
+    orders_.erase(orderId);
+
+    // Use the stop price for removal from the stop containers.
+    Price stopPrice = orderPointer->getStopPrice();
+
+    // Remove from the appropriate stop container.
+    if (orderPointer->getSide() == Side::BUY) {
+        // For BUY stop orders, remove from stopBids_.
+        auto it = stopBids_.find(stopPrice);
+        if (it != stopBids_.end()) {
+            if (it->second.size() > 1) {
+                it->second.remove(orderPointer);
+            } else {
+                stopBids_.erase(it);
+            }
+        }
+    } else {
+        // For SELL stop orders, remove from stopAsks_.
+        auto it = stopAsks_.find(stopPrice);
+        if (it != stopAsks_.end()) {
+            if (it->second.size() > 1) {
+                it->second.remove(orderPointer);
+            } else {
+                stopAsks_.erase(it);
+            }
+        }
+    }
+
+    std::cout << std::format("   > Removed Stop Order ({}) from the book.", orderId) << std::endl;
 }

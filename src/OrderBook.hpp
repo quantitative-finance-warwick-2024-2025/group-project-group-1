@@ -4,26 +4,33 @@
 
 class OrderBook {
   private:
+    // Bookds for Limit Orders
     Bids bids_;
     Asks asks_;
+    // Books for Stop Orders
+    StopBids stopBids_;
+    StopAsks stopAsks_;
+    // Other
     Orders orders_;
     OrderId currentOrderId_{0};
 
   public:
     void submitOrder(Order order);
-    OrderPointer viewOrder(OrderId orderId);
     void removeOrder(OrderId orderId);
     void printAsks();
     void printBids();
     void printOrders();
     void getBookSnapshot();
     void matchOrders();
+    void checkStopOrders();
     OrderId nextOrderId();
-    OrderPointer getBestBidOrder();
-    OrderPointer getBestAskOrder();
-    Price getMarketSpread();
+    OrderPointer viewOrder(OrderId orderId);
+    OrderPointer getBestBidOrder() const;
+    OrderPointer getBestAskOrder() const;
     Quantity getAskQuantityAtLevel(Price price);
     Quantity getBidQuantityAtLevel(Price price);
-    Price getMarketPrice();
+    Price getMarketSpread() const;
+    Price getMarketPrice() const;
     void clear();
+    void removeStopOrder(OrderPointer stopOrderPointer);
 };

@@ -2,40 +2,39 @@
 #include "Types.hpp"
 
 class Order {
-  protected:
-    OrderType orderType_;
+  private:
+    // Variables
     Side side_;
+    OrderType orderType_;
     OrderId orderId_;
+    IsTriggered isTriggered_{false};
     Price price_;
     Price stopPrice_;
     Quantity initialQuantity_;
     Quantity filledQuantity_{0};
 
     // Private constructor
-    Order(OrderType orderType, Side side, OrderId orderId, Price price, Price stopPrice,
-          Quantity initialQuantity);
+    Order(OrderType orderType, Side side, OrderId orderId, Price price, Price stopPrice, Quantity initialQuantity);
 
   public:
-    // Constructor for Stop Limit Market Order
-    // Order(Side side, OrderId orderId, Price stopPrice, Price limitPrice, Quantity
-    // initialQuantity);
-
+    Order();
     // Different consturctors for each order type
     static Order CreateMarketOrder(Side side, OrderId orderId, Quantity initialQuantity);
-    static Order CreateLimitOrder(Side side, OrderId orderId, Price price,
-                                  Quantity initialQuantity);
-    static Order CreateStopOrder(Side side, OrderId orderId, Price stopPrice,
-                                 Quantity initialQuantity);
-    static Order CreateStopLimitOrder(Side side, OrderId orderId, Price stopPrice, Price limitPrice,
-                                      Quantity initialQuantity);
+    static Order CreateLimitOrder(Side side, OrderId orderId, Price price, Quantity initialQuantity);
+    static Order CreateStopOrder(Side side, OrderId orderId, Price stopPrice, Quantity initialQuantity);
+    static Order CreateStopLimitOrder(Side side, OrderId orderId, Price stopPrice, Price limitPrice, Quantity initialQuantity);
 
-    OrderType getOrderType();
-    Side getSide();
-    OrderId getOrderId();
-    Price getPrice();
-    Price getStopPrice();
-    Quantity getInitialQuantity();
-    Quantity getRemainingQuantity();
-    Quantity getFilledQuantity();
+    // Getters
+    Side getSide() const;
+    OrderId getOrderId() const;
+    OrderType getOrderType() const;
+    IsTriggered getIsTriggered() const;
+    Price getPrice() const;
+    Price getStopPrice() const;
+    Quantity getInitialQuantity() const;
+    Quantity getRemainingQuantity() const;
+    Quantity getFilledQuantity() const;
+
+    // Methods
     void fill(Quantity quantity);
 };
