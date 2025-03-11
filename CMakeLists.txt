@@ -2,7 +2,7 @@
 cmake_minimum_required(VERSION 3.10)
 
 # Project name
-project(MyProgram)
+project(CPP_LOB)
 
 # Set C++ standards
 set(CMAKE_CXX_STANDARD 20)
@@ -13,7 +13,7 @@ add_compile_options(-Wall -Wextra)
 # Add more source files here if needed
 set(SRC_FILES ${CMAKE_SOURCE_DIR}/src/Order.cpp ${CMAKE_SOURCE_DIR}/src/OrderBook.cpp ${CMAKE_SOURCE_DIR}/src/CLIHandler.cpp)
 
-add_executable(my_program ${SRC_FILES} ${CMAKE_SOURCE_DIR}/src/main.cpp)
+add_executable(cpp_lob_cli ${SRC_FILES} ${CMAKE_SOURCE_DIR}/src/main.cpp)
 
 ####################### TESTING STUFF STARTS HERE ###########################################################
 

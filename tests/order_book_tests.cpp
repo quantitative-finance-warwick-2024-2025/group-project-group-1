@@ -22,18 +22,18 @@ TEST_CASE("OrderBook - Market Spread Calculation", "[tests]") {
 
     // Simple Market Spread Example
     orderBook.clear();
-    Order buyLimitOrder(Side::BUY, orderBook.nextOrderId(), 1.50, 100);
-    Order sellLimitOrder(Side::SELL, orderBook.nextOrderId(), 1.70, 100);
-    orderBook.addOrder(buyLimitOrder);
-    orderBook.addOrder(sellLimitOrder);
+    Order buyLimitOrder = Order::CreateLimitOrder(Side::BUY, orderBook.nextOrderId(), 1.50, 100);
+    Order sellLimitOrder = Order::CreateLimitOrder(Side::SELL, orderBook.nextOrderId(), 1.70, 100);
+    orderBook.submitOrder(buyLimitOrder);
+    orderBook.submitOrder(sellLimitOrder);
     REQUIRE(orderBook.getMarketSpread() == Approx(0.2).epsilon(EPSILON));
 
     // Reset orderbook and test again
     orderBook.clear();
-    Order buyLimitOrder1(Side::BUY, orderBook.nextOrderId(), 3.50, 31);
-    Order sellLimitOrder1(Side::SELL, orderBook.nextOrderId(), 4.92, 34);
-    orderBook.addOrder(buyLimitOrder1);
-    orderBook.addOrder(sellLimitOrder1);
+    Order buyLimitOrder1 = Order::CreateLimitOrder(Side::BUY, orderBook.nextOrderId(), 3.50, 31);
+    Order sellLimitOrder1 = Order::CreateLimitOrder(Side::SELL, orderBook.nextOrderId(), 4.92, 34);
+    orderBook.submitOrder(buyLimitOrder1);
+    orderBook.submitOrder(sellLimitOrder1);
     REQUIRE(orderBook.getMarketSpread() == Approx(1.42).epsilon(EPSILON));
 }
 
@@ -42,29 +42,29 @@ TEST_CASE("OrderBook - Best Bid/Ask Methods", "[tests]") {
     // Test best bid - also tests correct sorting
     orderBook.clear();
 
-    orderBook.addOrder(Order(Side::BUY, orderBook.nextOrderId(), 1.75, 50));
+    orderBook.submitOrder(Order::CreateLimitOrder(Side::BUY, orderBook.nextOrderId(), 1.75, 50));
     REQUIRE(orderBook.getBestBidOrder()->getPrice() == Approx(1.75).epsilon(EPSILON));
     REQUIRE(orderBook.getBestAskOrder() == nullptr);
 
-    orderBook.addOrder(Order(Side::BUY, orderBook.nextOrderId(), 1.85, 50));
+    orderBook.submitOrder(Order::CreateLimitOrder(Side::BUY, orderBook.nextOrderId(), 1.85, 50));
     REQUIRE(orderBook.getBestBidOrder()->getPrice() == Approx(1.85).epsilon(EPSILON));
     REQUIRE(orderBook.getBestAskOrder() == nullptr);
 
-    orderBook.addOrder(Order(Side::BUY, orderBook.nextOrderId(), 1.65, 50));
+    orderBook.submitOrder(Order::CreateLimitOrder(Side::BUY, orderBook.nextOrderId(), 1.65, 50));
     REQUIRE(orderBook.getBestBidOrder()->getPrice() == Approx(1.85).epsilon(EPSILON));
     REQUIRE(orderBook.getBestAskOrder() == nullptr);
 
     orderBook.clear();
 
-    orderBook.addOrder(Order(Side::SELL, orderBook.nextOrderId(), 1.65, 50));
+    orderBook.submitOrder(Order::CreateLimitOrder(Side::SELL, orderBook.nextOrderId(), 1.65, 50));
     REQUIRE(orderBook.getBestAskOrder()->getPrice() == Approx(1.65).epsilon(EPSILON));
     REQUIRE(orderBook.getBestBidOrder() == nullptr);
 
-    orderBook.addOrder(Order(Side::SELL, orderBook.nextOrderId(), 1.55, 50));
+    orderBook.submitOrder(Order::CreateLimitOrder(Side::SELL, orderBook.nextOrderId(), 1.55, 50));
     REQUIRE(orderBook.getBestAskOrder()->getPrice() == Approx(1.55).epsilon(EPSILON));
     REQUIRE(orderBook.getBestBidOrder() == nullptr);
 
-    orderBook.addOrder(Order(Side::SELL, orderBook.nextOrderId(), 1.75, 50));
+    orderBook.submitOrder(Order::CreateLimitOrder(Side::SELL, orderBook.nextOrderId(), 1.75, 50));
     REQUIRE(orderBook.getBestAskOrder()->getPrice() == Approx(1.55).epsilon(EPSILON));
     REQUIRE(orderBook.getBestBidOrder() == nullptr);
 }
@@ -75,8 +75,7 @@ TEST_CASE("MarketOrder - Execution Tests", "[tests]") {
 
     // Can fully execute the market order to buy with just enough orders
     OrderId limOrderId = orderBook.nextOrderId();
-    orderBook.addOrder(Order(Side::SELL, limOrderId, 1.75, 100));
-    Order marketOrder1(Side::BUY, orderBook.nextOrderId(), 100);
-    orderBook.executeOrder(marketOrder1);
+    orderBook.submitOrder(Order::CreateLimitOrder(Side::SELL, limOrderId, 1.75, 100));
+    orderBook.submitOrder(Order::CreateMarketOrder(Side::BUY, orderBook.nextOrderId(), 100));
     REQUIRE(orderBook.viewOrder(limOrderId) == nullptr);
 }

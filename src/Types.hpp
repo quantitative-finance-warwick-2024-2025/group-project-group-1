@@ -12,11 +12,16 @@ using Price = double;
 using Quantity = int;
 using OrderId = int;
 using Time = std::time_t;
+using IsTriggered = bool;
 
 using OrderPointer = std::shared_ptr<Order>;
 using OrderPointers = std::list<OrderPointer>;
 using Bids = std::map<Price, OrderPointers, std::greater<Price>>;
 using Asks = std::map<Price, OrderPointers, std::less<Price>>;
+
+using StopBids = std::map<Price, OrderPointers, std::less<Price>>;
+using StopAsks = std::map<Price, OrderPointers, std::greater<Price>>;
+
 using Orders = std::unordered_map<OrderId, OrderPointer>;
 
 struct Constants {
