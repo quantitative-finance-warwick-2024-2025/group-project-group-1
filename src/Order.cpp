@@ -5,8 +5,10 @@
 Order::Order() {}
 
 // General Constructor
-Order::Order(OrderType orderType, Side side, OrderId orderId, Price price, Price stopPrice, Quantity initialQuantity)
-    : orderType_(orderType), side_(side), orderId_(orderId), price_(price), stopPrice_(stopPrice), initialQuantity_(initialQuantity) {}
+Order::Order(OrderType orderType, Side side, OrderId orderId, Price price, Price stopPrice, Quantity initialQuantity,
+             IsTriggered isTriggered, IsTriggered wasStopOrder)
+    : orderType_(orderType), side_(side), orderId_(orderId), price_(price), stopPrice_(stopPrice), initialQuantity_(initialQuantity),
+      isTriggered_(isTriggered), wasStopOrder_(wasStopOrder) {}
 
 // Constructor for Market Order
 Order Order::CreateMarketOrder(Side side, OrderId orderId, Quantity initialQuantity) {
@@ -14,8 +16,9 @@ Order Order::CreateMarketOrder(Side side, OrderId orderId, Quantity initialQuant
 }
 
 // Constructor for Limit Order
-Order Order::CreateLimitOrder(Side side, OrderId orderId, Price price, Quantity initialQuantity) {
-    return Order(OrderType::LIMIT, side, orderId, price, Constants::NoPrice, initialQuantity);
+Order Order::CreateLimitOrder(Side side, OrderId orderId, Price price, Quantity initialQuantity, IsTriggered isTriggered,
+                              bool wasStopOrder) {
+    return Order(OrderType::LIMIT, side, orderId, price, Constants::NoPrice, initialQuantity, isTriggered, wasStopOrder);
 }
 
 // Constructor for Stop Market Order
@@ -33,6 +36,7 @@ Side Order::getSide() const { return side_; }
 OrderId Order::getOrderId() const { return orderId_; }
 OrderType Order::getOrderType() const { return orderType_; }
 IsTriggered Order::getIsTriggered() const { return isTriggered_; }
+IsTriggered Order::getWasStopOrder() const { return wasStopOrder_; }
 Price Order::getPrice() const { return price_; }
 Price Order::getStopPrice() const { return stopPrice_; }
 Quantity Order::getInitialQuantity() const { return initialQuantity_; }
