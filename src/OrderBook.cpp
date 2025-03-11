@@ -1,6 +1,7 @@
 #include "OrderBook.hpp"
 #include "Order.hpp"
 #include "Types.hpp"
+#include <cmath>
 #include <iomanip>
 #include <iostream>
 
@@ -44,7 +45,7 @@ void OrderBook::submitOrder(Order order) {
 
     // Order IDs must be unique
     if (orders_.contains(orderId)) {
-        throw std::logic_error(std::format("Order ({}) already exists. Duplication occurred.", orderId));
+        throw std::logic_error("Order (" + std::to_string(orderId) + ") already exists. Duplication occurred.");
     }
 
     // If its a market order, handle execution
@@ -217,7 +218,7 @@ void OrderBook::removeOrder(OrderId orderId, bool print) {
     }
 
     if (print) {
-        std::cout << GREEN << std::format("[System] Removed Order ({}) from the book.", orderId) << RESET << std::endl;
+        std::cout << GREEN << "[System] Removed order (" << orderId << ") from the book." << RESET << std::endl;
     }
 }
 
@@ -368,7 +369,7 @@ void OrderBook::checkStopOrders() {
                 triggeredOrder = Order::CreateMarketOrder(orderPtr->getSide(), orderPtr->getOrderId(), orderPtr->getRemainingQuantity());
             } else { // STOP_LIMIT order
                 triggeredOrder = Order::CreateLimitOrder(orderPtr->getSide(), orderPtr->getOrderId(), orderPtr->getPrice(),
-                                                         orderPtr->getRemainingQuantity());
+                                                         orderPtr->getRemainingQuantity(), true, true);
             }
 
             std::cout << YELLOW << "[System] Triggered BUY stop order (#" << orderPtr->getOrderId() << ") at market price " << marketPrice
@@ -396,7 +397,7 @@ void OrderBook::checkStopOrders() {
                 triggeredOrder = Order::CreateMarketOrder(orderPtr->getSide(), orderPtr->getOrderId(), orderPtr->getRemainingQuantity());
             } else { // STOP_LIMIT order
                 triggeredOrder = Order::CreateLimitOrder(orderPtr->getSide(), orderPtr->getOrderId(), orderPtr->getPrice(),
-                                                         orderPtr->getRemainingQuantity());
+                                                         orderPtr->getRemainingQuantity(), true, true);
             }
 
             // Remove stop order
@@ -460,7 +461,7 @@ void OrderBook::removeStopOrder(OrderPointer orderPointer, bool print) {
     }
 
     if (print) {
-        std::cout << RED << std::format("[System] Removed Stop Order ({}) from the book.", orderId) << RESET << std::endl;
+        std::cout << RED << "[System] Removed stop order (" << orderId << ") from the book." << RESET << std::endl;
     }
 }
 
@@ -526,7 +527,56 @@ OrderPointer OrderBook::getOrder(OrderId orderId) {
 
     // Return order
     OrderPointer orderPointer = orders_.at(orderId);
-    return orderPointer;
+
+    Side orderSide = orderPointer->getSide();
+    Price limitPrice = orderPointer->getPrice();
+    Price stopPrice = orderPointer->getStopPrice();
+    OrderType orderType = orderPointer->getOrderType();
+
+    if (orderType == OrderType::LIMIT) {
+        // Check if it is present in the actual order book (bids or asks)
+        if (orderSide == Side::BUY) {
+            if (bids_.contains(limitPrice)) {
+                for (OrderPointer bidOrder : bids_.at(limitPrice)) {
+                    if (bidOrder->getOrderId() == orderId) {
+                        return orderPointer; // Order is in the bids
+                    }
+                }
+            }
+        } else { // Side::SELL
+            if (asks_.contains(limitPrice)) {
+                for (OrderPointer askOrder : asks_.at(limitPrice)) {
+                    if (askOrder->getOrderId() == orderId) {
+                        return orderPointer; // Order is in the asks
+                    }
+                }
+            }
+        }
+    }
+
+    if (orderType == OrderType::STOP_LIMIT || orderType == OrderType::STOP_MARKET) {
+        // Check if it is present in the actual order book (bids or asks)
+        if (orderSide == Side::BUY) {
+            if (stopBids_.contains(stopPrice)) {
+                for (OrderPointer bidOrder : stopBids_.at(stopPrice)) {
+                    if (bidOrder->getOrderId() == orderId) {
+                        return orderPointer; // Order is in the bids
+                    }
+                }
+            }
+        } else { // Side::SELL
+            if (stopAsks_.contains(stopPrice)) {
+                for (OrderPointer askOrder : stopAsks_.at(stopPrice)) {
+                    if (askOrder->getOrderId() == orderId) {
+                        return orderPointer; // Order is in the asks
+                    }
+                }
+            }
+        }
+    }
+
+    // If the order is not found in bids or asks, return nullptr
+    return nullptr;
 }
 
 // Methods that returns the market spread

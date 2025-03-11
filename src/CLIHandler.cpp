@@ -2,6 +2,7 @@
 #include "Order.hpp"
 #include "OrderBook.hpp"
 #include "Types.hpp"
+#include <cmath>
 #include <iomanip>
 #include <iostream>
 
@@ -62,7 +63,7 @@ bool CLIHandler::isValidInt(Token value) {
 }
 
 ///////////////////////////////////////////////////////////////
-// Handler Methods
+// Running Methods
 ///////////////////////////////////////////////////////////////
 
 // Make the CLIHandler run
@@ -310,6 +311,8 @@ void CLIHandler::handleViewOrder(Tokens tokens) {
     bool isStopMarket = orderType == OrderType::STOP_MARKET;
     bool isStopLimit = orderType == OrderType::STOP_LIMIT;
     bool isLimit = orderType == OrderType::LIMIT;
+    bool isStopOrder = isStopLimit || isStopMarket;
+    bool wasStopOrder = orderPointer->getWasStopOrder();
 
     // Print summmary of the order
     std::cout << "Summary of Order " << orderPointer->getOrderId() << std::endl;
@@ -317,7 +320,8 @@ void CLIHandler::handleViewOrder(Tokens tokens) {
 
     // Print order is buy or sell
     std::cout << "Order Type: " << (isStopMarket ? "Stop Market " : "") << (isStopLimit ? "Stop Limit " : "")
-              << (orderSide == Side::BUY ? "Buy Order" : "Sell Order") << (isTriggered ? " (Triggered)" : " (Not Triggered)") << std::endl;
+              << (orderSide == Side::BUY ? "Buy Order" : "Sell Order") << (isTriggered && wasStopOrder ? " (Triggered)" : "")
+              << (!isTriggered && isStopOrder ? " (Not Triggered)" : "") << std::endl;
 
     // Show the Limit Price
     if (isLimit || isStopLimit) {
