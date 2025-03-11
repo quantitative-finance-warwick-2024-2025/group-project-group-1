@@ -2,6 +2,7 @@
 #include "Order.hpp"
 #include "OrderBook.hpp"
 #include "Types.hpp"
+#include <cmath>
 #include <iomanip>
 #include <iostream>
 

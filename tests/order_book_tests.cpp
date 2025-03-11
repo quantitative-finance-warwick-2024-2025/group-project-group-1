@@ -3,6 +3,7 @@
 #include "OrderBook.hpp"
 #include "Types.hpp"
 #include "catch.hpp"
+#include <cmath>
 
 // Define accuracy
 #define EPSILON 1e-14

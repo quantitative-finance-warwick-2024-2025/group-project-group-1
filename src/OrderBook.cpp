@@ -1,6 +1,7 @@
 #include "OrderBook.hpp"
 #include "Order.hpp"
 #include "Types.hpp"
+#include <cmath>
 #include <iomanip>
 #include <iostream>
 
