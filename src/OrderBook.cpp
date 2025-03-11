@@ -1,3 +1,21 @@
+#define RESET "\033[0m"
+#define BLACK "\033[30m"              /* Black */
+#define RED "\033[31m"                /* Red */
+#define GREEN "\033[32m"              /* Green */
+#define YELLOW "\033[33m"             /* Yellow */
+#define BLUE "\033[34m"               /* Blue */
+#define MAGENTA "\033[35m"            /* Magenta */
+#define CYAN "\033[36m"               /* Cyan */
+#define WHITE "\033[37m"              /* White */
+#define BOLDBLACK "\033[1m\033[30m"   /* Bold Black */
+#define BOLDRED "\033[1m\033[31m"     /* Bold Red */
+#define BOLDGREEN "\033[1m\033[32m"   /* Bold Green */
+#define BOLDYELLOW "\033[1m\033[33m"  /* Bold Yellow */
+#define BOLDBLUE "\033[1m\033[34m"    /* Bold Blue */
+#define BOLDMAGENTA "\033[1m\033[35m" /* Bold Magenta */
+#define BOLDCYAN "\033[1m\033[36m"    /* Bold Cyan */
+#define BOLDWHITE "\033[1m\033[37m"   /* Bold White */
+
 #include "OrderBook.hpp"
 #include "Order.hpp"
 #include "Types.hpp"
@@ -56,9 +74,11 @@ void OrderBook::submitOrder(Order order) {
         }
 
         if (remainingQuantity == 0) {
-            std::cout << "   > Fully executed market order." << std::endl;
+            std::cout << YELLOW << "[System] Market order (#" << orderId << ") for " << order.getInitialQuantity()
+                      << " units executed in full." << RESET << std::endl;
         } else {
-            std::cout << "   > Partially executed market order. Remaining quantity: " << remainingQuantity << std::endl;
+            std::cout << YELLOW << "[System] Market order (#" << orderId
+                      << ") partially executed. Remaining quantity: " << remainingQuantity << " units." << RESET << std::endl;
         }
 
         matchOrders();
@@ -80,8 +100,9 @@ void OrderBook::submitOrder(Order order) {
             asks_[limitPrice].push_back(orderPointer);
         }
 
-        std::cout << "   > Added Limit (" << (orderPointer->getSide() == Side::BUY ? "buy" : "sell") << ") order (" << orderId << ") for "
-                  << orderPointer->getRemainingQuantity() << " @ " << orderPointer->getPrice() << std::endl;
+        std::cout << GREEN << "[System] Limit (" << (orderPointer->getSide() == Side::BUY ? "buy" : "sell") << ") order (#" << orderId
+                  << ") for " << orderPointer->getRemainingQuantity() << " units @ " << orderPointer->getPrice()
+                  << " has been added to the order book." << RESET << std::endl;
 
         matchOrders();
         checkStopOrders();
@@ -99,8 +120,15 @@ void OrderBook::submitOrder(Order order) {
             stopAsks_[order.getStopPrice()].push_back(orderPointer);
         }
 
-        std::cout << "   > Added Stop Order (" << (orderSide == Side::BUY ? "buy" : "sell") << ") with stop price " << order.getStopPrice()
-                  << " and quantity " << order.getRemainingQuantity() << std::endl;
+        if (orderType == OrderType::STOP_MARKET) {
+            std::cout << GREEN << "[System] Stop-Market (" << (orderSide == Side::BUY ? "buy" : "sell") << ") order (#"
+                      << order.getOrderId() << ") for " << order.getRemainingQuantity() << " units with stop price " << order.getStopPrice()
+                      << " has been added." << RESET << std::endl;
+        } else {
+            std::cout << GREEN << "[System] Stop-Limit (" << (orderSide == Side::BUY ? "buy" : "sell") << ") order (#" << order.getOrderId()
+                      << ") for " << order.getRemainingQuantity() << " units with stop price " << order.getStopPrice()
+                      << " and limit price " << order.getPrice() << " has been added." << RESET << std::endl;
+        }
 
         checkStopOrders();
     }
@@ -171,22 +199,30 @@ OrderPointer OrderBook::viewOrder(OrderId orderId) {
 
     // Return order
     OrderPointer orderPointer = orders_.at(orderId);
-    // std::cout << std::format("   > Order ({}) Found. Level price is ", orderId)
-    //           << orderPointer->getPrice() << std::endl;
     return orderPointer;
 }
 
 // Method that removes order from the book
-void OrderBook::removeOrder(OrderId orderId) {
+void OrderBook::removeOrder(OrderId orderId, bool print) {
     // Check if order exists
     if (!orders_.contains(orderId)) {
-        std::cout << "   > Order ID doesn't exist. \n";
+        if (print) {
+            std::cout << RED << "[System] Order " << orderId << " doesn't exist." << RESET << std::endl;
+        }
         return;
     }
 
     // Get the order
     OrderPointer orderPointer = viewOrder(orderId);
+
+    // Get orderType
+    OrderType orderType = orderPointer->getOrderType();
     Price levelPrice = orderPointer->getPrice();
+
+    if (orderType == OrderType::STOP_LIMIT || orderType == OrderType::STOP_MARKET) {
+        removeStopOrder(orderPointer, print);
+        return;
+    }
 
     // Remove the order from list of price level, or delete whole price level
     orders_.erase(orderId);
@@ -206,7 +242,9 @@ void OrderBook::removeOrder(OrderId orderId) {
         }
     }
 
-    std::cout << std::format("   > Removed Order ({}) from the book.", orderId) << std::endl;
+    if (print) {
+        std::cout << GREEN << std::format("[System] Removed Order ({}) from the book.", orderId) << RESET << std::endl;
+    }
 }
 
 void OrderBook::getBookSnapshot() {
@@ -274,8 +312,6 @@ OrderId OrderBook::nextOrderId() {
 
 // Method that matches the limit order book
 void OrderBook::matchOrders() {
-    std::cout << "   > Matching algorithm triggered." << std::endl;
-
     // Continue matching as long as both sides of the book have orders
     while (!bids_.empty() && !asks_.empty()) {
         // Identify best bid and best ask
@@ -308,8 +344,8 @@ void OrderBook::matchOrders() {
             bidOrder->fill(tradeQty);
             askOrder->fill(tradeQty);
 
-            std::cout << "   > Trade executed: " << tradeQty << " @ " << tradePrice << " between BUY order " << bidOrder->getOrderId()
-                      << " and SELL order " << askOrder->getOrderId() << std::endl;
+            std::cout << YELLOW << "[System] Trade executed: " << tradeQty << " units @ " << tradePrice << " between BUY order (#"
+                      << bidOrder->getOrderId() << ") and SELL order (#" << askOrder->getOrderId() << ")." << RESET << std::endl;
 
             matchedAnything = true;
 
@@ -360,11 +396,11 @@ void OrderBook::checkStopOrders() {
                                                          orderPtr->getRemainingQuantity());
             }
 
-            // Remove the stop order
+            std::cout << YELLOW << "[System] Triggered BUY stop order (#" << orderPtr->getOrderId() << ") at market price " << marketPrice
+                      << RESET << std::endl; // Remove the stop order
             removeStopOrder(orderPtr);
             // Re-submit the converted order
             submitOrder(triggeredOrder);
-            std::cout << "   > Triggered BUY stop order " << orderPtr->getOrderId() << " at market price " << marketPrice << std::endl;
             matchOrders();
             return;
         }
@@ -389,10 +425,11 @@ void OrderBook::checkStopOrders() {
             }
 
             // Remove stop order
+            std::cout << YELLOW << "[SYSTEM] Triggered SELL stop order (#" << orderPtr->getOrderId() << ") at market price " << marketPrice
+                      << RESET << std::endl;
             removeStopOrder(orderPtr);
             // Re-submit converted order
             submitOrder(triggeredOrder);
-            std::cout << "Triggered SELL stop order " << orderPtr->getOrderId() << " at market price " << marketPrice << std::endl;
             matchOrders();
             return;
         }
@@ -486,11 +523,13 @@ void OrderBook::clear() {
     currentOrderId_ = 0;
 }
 
-void OrderBook::removeStopOrder(OrderPointer orderPointer) {
+void OrderBook::removeStopOrder(OrderPointer orderPointer, bool print) {
     // Check if the order exists in the main orders map.
     OrderId orderId = orderPointer->getOrderId();
     if (!orders_.contains(orderId)) {
-        std::cout << "   > Order ID doesn't exist.\n";
+        if (print) {
+            std::cout << RED << "[System] Order ID doesn't exist." << RESET << std::endl;
+        }
         return;
     }
 
@@ -523,5 +562,7 @@ void OrderBook::removeStopOrder(OrderPointer orderPointer) {
         }
     }
 
-    std::cout << std::format("   > Removed Stop Order ({}) from the book.", orderId) << std::endl;
+    if (print) {
+        std::cout << RED << std::format("[System] Removed Stop Order ({}) from the book.", orderId) << RESET << std::endl;
+    }
 }

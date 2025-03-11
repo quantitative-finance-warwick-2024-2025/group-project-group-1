@@ -16,7 +16,7 @@ class OrderBook {
 
   public:
     void submitOrder(Order order);
-    void removeOrder(OrderId orderId);
+    void removeOrder(OrderId orderId, bool print = false);
     void printAsks();
     void printBids();
     void printOrders();
@@ -32,5 +32,5 @@ class OrderBook {
     Price getMarketSpread() const;
     Price getMarketPrice() const;
     void clear();
-    void removeStopOrder(OrderPointer stopOrderPointer);
+    void removeStopOrder(OrderPointer stopOrderPointer, bool print = false);
 };

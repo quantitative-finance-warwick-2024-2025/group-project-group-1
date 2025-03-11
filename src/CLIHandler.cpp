@@ -1,3 +1,21 @@
+#define RESET "\033[0m"
+#define BLACK "\033[30m"              /* Black */
+#define RED "\033[31m"                /* Red */
+#define GREEN "\033[32m"              /* Green */
+#define YELLOW "\033[33m"             /* Yellow */
+#define BLUE "\033[34m"               /* Blue */
+#define MAGENTA "\033[35m"            /* Magenta */
+#define CYAN "\033[36m"               /* Cyan */
+#define WHITE "\033[37m"              /* White */
+#define BOLDBLACK "\033[1m\033[30m"   /* Bold Black */
+#define BOLDRED "\033[1m\033[31m"     /* Bold Red */
+#define BOLDGREEN "\033[1m\033[32m"   /* Bold Green */
+#define BOLDYELLOW "\033[1m\033[33m"  /* Bold Yellow */
+#define BOLDBLUE "\033[1m\033[34m"    /* Bold Blue */
+#define BOLDMAGENTA "\033[1m\033[35m" /* Bold Magenta */
+#define BOLDCYAN "\033[1m\033[36m"    /* Bold Cyan */
+#define BOLDWHITE "\033[1m\033[37m"   /* Bold White */
+
 #include "CLIHandler.hpp"
 #include "Order.hpp"
 #include "OrderBook.hpp"
@@ -28,8 +46,11 @@ const std::vector<CommandInfo> commands = {{"LIMIT", "[BUY|SELL] <Quantity> <Lim
                                            {"EXIT", "", "Exit the application"}};
 
 // Invalid Numbers Error Message and Incorrect Formatting Error Message
-const std::string INVALID_MSG = "Invalid values entered. Type 'HELP' to see the arguments of the command.";
-const std::string FORMAT_ERROR_MSG = "Command is incorrectly formatted. Type 'HELP' to see the correct format of the command.";
+const std::string INVALID_MSG =
+    std::string(RED) + "[System] Invalid values entered. Type 'HELP' to see the arguments of the command." + std::string(RESET);
+const std::string FORMAT_ERROR_MSG = std::string(RED) +
+                                     "[System] Command is incorrectly formatted. Type 'HELP' to see the correct format of the command." +
+                                     std::string(RESET);
 
 // Constructor
 CLIHandler::CLIHandler(OrderBook &orderBook) : orderBook_(orderBook) {}
@@ -68,7 +89,6 @@ void CLIHandler::run() {
         std::getline(std::cin, input);
         if (input.empty())
             continue;
-        std::cout << "" << std::endl;
         std::vector<std::string> tokens = parseArguments(input);
         std::string command = tokens[0];
 
@@ -99,9 +119,8 @@ void CLIHandler::run() {
         } else if (command == "EXIT") {
             break;
         } else {
-            std::cout << "Command not recognized. Type 'HELP' to see the list of available commands." << std::endl;
+            std::cout << INVALID_MSG << std::endl;
         }
-        std::cout << "\n";
     }
 }
 
@@ -243,9 +262,9 @@ void CLIHandler::displayHelp() {
 void CLIHandler::handleMarketSpread() {
     double marketSpread = orderBook_.getMarketSpread();
     if (std::isnan(marketSpread)) {
-        std::cout << "   > No liquidity in the market. Unable to calculate market spread" << std::endl;
+        std::cout << RED << "[System] No liquidity in the market. Unable to calculate market spread" << RESET << std::endl;
     } else {
-        std::cout << "   > Market Spread is $" << marketSpread << std::endl;
+        std::cout << "[System] Market Spread is $" << marketSpread << std::endl;
     }
 }
 
@@ -277,7 +296,7 @@ void CLIHandler::handleCancel(std::vector<std::string> tokens) {
         return;
     }
     OrderId orderId = std::stoi(tokens[1]);
-    orderBook_.removeOrder(orderId);
+    orderBook_.removeOrder(orderId, true);
 }
 
 // Display details on order by id
